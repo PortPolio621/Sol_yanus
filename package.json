@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "솔 야누스 키우기 - 모바일(Capacitor) 포팅",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "serve": "npx http-server www -p 8080 -c-1",
     "validate": "node scripts/validate.js",
