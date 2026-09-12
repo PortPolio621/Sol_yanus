@@ -5,6 +5,7 @@
   "description": "솔 야누스 키우기 - 모바일(Capacitor) 포팅",
   "scripts": {
     "serve": "npx http-server www -p 8080 -c-1",
+    "validate": "node scripts/validate.js",
     "cap:sync": "cap sync",
     "cap:add:android": "cap add android",
     "cap:add:ios": "cap add ios",

@@ -48,6 +48,16 @@ npm run serve
 # http://localhost:8080 을 열고, 브라우저 개발자도구의 모바일 기기 시뮬레이션으로 확인
 ```
 
+## CI
+
+`main`에 대한 모든 push/PR에서 GitHub Actions(`.github/workflows/ci.yml`)가 다음을 확인합니다:
+
+- `package.json`, `capacitor.config.json`, `www/manifest.json`이 유효한 JSON인지
+- `www/index.html` 안의 인라인 스크립트에 문법 오류가 없는지(`npm run validate`)
+- `npx cap sync`가 오류 없이 android/ios 네이티브 프로젝트에 웹 자산을 반영하는지
+
+로컬에서 같은 검사를 미리 돌려보려면: `npm run validate && npx cap sync`
+
 ## 실제 모바일 앱으로 빌드하기 (Capacitor)
 
 사전 준비물: Node.js, 그리고 Android는 Android Studio(+ Android SDK), iOS는 macOS + Xcode.
