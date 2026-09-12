@@ -1,0 +1,22 @@
+{
+  "name": "sol-yanus-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "솔 야누스 키우기 - 모바일(Capacitor) 포팅",
+  "scripts": {
+    "serve": "npx http-server www -p 8080 -c-1",
+    "cap:sync": "cap sync",
+    "cap:add:android": "cap add android",
+    "cap:add:ios": "cap add ios",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}
