@@ -1,0 +1,3717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1c1530">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>솔 야누스 키우기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#ff9d5c;
+    --sky-mid:#c86b8f;
+    --sky-bot:#2d2a53;
+    --sea:#132a4a;
+    --wood-dark:#5b3a24;
+    --wood:#8a5a34;
+    --wood-light:#c98a4b;
+    --gold:#e8b34c;
+    --cream:#f5ead9;
+    --ink:#1c1530;
+    --danger:#e2574c;
+  }
+  *{box-sizing:border-box;}
+  html{
+    height:100%;
+    /* 모바일 웹뷰에서 핀치줌/더블탭줌/텍스트 자동 확대를 막아 네이티브 앱처럼 동작하게 함 */
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+  html, body{
+    overscroll-behavior:none; /* 당겨서 새로고침/바운스 스크롤 방지 */
+  }
+  body{
+    margin:0;
+    font-family:'Noto Sans KR',sans-serif;
+    color:var(--cream);
+    background:var(--ink);
+    min-height:100vh;
+    min-height:100dvh;
+    height:100%;
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    width:100%;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+  /* 로그인/회원가입 입력창은 텍스트 선택/커서가 정상 동작해야 함 */
+  input, textarea{
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .screen{
+    display:none;
+    height:100vh;
+    height:100dvh;
+    width:100%;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    padding:24px;
+    padding-top:calc(24px + env(safe-area-inset-top));
+    padding-bottom:calc(24px + env(safe-area-inset-bottom));
+    padding-left:calc(24px + env(safe-area-inset-left));
+    padding-right:calc(24px + env(safe-area-inset-right));
+    overflow-y:auto;
+  }
+  .screen.active{display:flex;}
+
+  /* ---------- 타이틀 화면 ---------- */
+  #screen-title{
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.15), transparent 60%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-bot) 100%);
+  }
+  .title-card{
+    text-align:center;
+  }
+  .game-title{
+    font-family:'Black Han Sans',sans-serif;
+    font-size:clamp(2.4rem,7vw,4.2rem);
+    margin:0;
+    letter-spacing:2px;
+    color:var(--cream);
+    text-shadow:0 4px 0 rgba(0,0,0,.25), 0 0 30px rgba(232,179,76,.5);
+  }
+  .game-subtitle{
+    margin:10px 0 44px;
+    font-size:1rem;
+    letter-spacing:4px;
+    color:rgba(245,234,217,.8);
+  }
+  .title-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    width:min(280px,80vw);
+    margin:0 auto;
+  }
+  .btn{
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    padding:14px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:translateY(1px) scale(.99);}
+  .btn-primary{background:var(--gold);color:#3a2409;}
+  .btn-secondary{background:rgba(245,234,217,.12);color:var(--cream);border:1px solid rgba(245,234,217,.4);}
+  .btn-ghost{background:transparent;color:rgba(245,234,217,.7);border:1px solid rgba(245,234,217,.25);}
+
+  /* ---------- 로그인 / 회원가입 ---------- */
+  #screen-login, #screen-signup{
+    background:linear-gradient(180deg, var(--sky-bot), #1a1533);
+  }
+  .auth-card{
+    background:rgba(20,16,40,.55);
+    border:1px solid rgba(245,234,217,.15);
+    backdrop-filter:blur(6px);
+    border-radius:16px;
+    padding:32px;
+    width:min(360px,90vw);
+  }
+  .auth-card h2{
+    font-family:'Black Han Sans',sans-serif;
+    letter-spacing:1px;
+    margin:0 0 22px;
+    font-size:1.5rem;
+  }
+  .auth-card label{
+    display:block;
+    font-size:.82rem;
+    color:rgba(245,234,217,.75);
+    margin-bottom:14px;
+  }
+  .auth-card input{
+    display:block;
+    width:100%;
+    margin-top:6px;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(245,234,217,.3);
+    background:rgba(255,255,255,.06);
+    color:var(--cream);
+    font-size:.95rem;
+  }
+  .auth-card input:focus{outline:2px solid var(--gold);}
+  .error-msg{
+    color:var(--danger);
+    font-size:.82rem;
+    margin:-4px 0 14px;
+  }
+  .match-msg{
+    font-size:.8rem;
+    margin:-10px 0 14px;
+    font-weight:500;
+  }
+  .auth-buttons{display:flex;gap:10px;margin-top:6px;}
+  .auth-buttons .btn{flex:1;}
+
+  /* ---------- 게임 화면 (시작의 초원 · 탑뷰) ---------- */
+  #screen-game{
+    align-items:stretch;
+    justify-content:flex-start;
+    flex-direction:column;
+    padding:0;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+  }
+  .game-main{
+    display:flex;
+    flex-direction:row;
+    flex:1;
+    min-height:0;
+    position:relative; /* HUD/조이스틱 오버레이 기준 박스 */
+  }
+  .harbor-stage{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    background-image:
+      radial-gradient(rgba(255,255,255,.10) 1.5px, transparent 1.6px),
+      repeating-linear-gradient(90deg, #6cb24e 0 40px, #63a746 40px 80px),
+      linear-gradient(180deg, #8ed36a 0%, #4f8a3a 70%, #3d7530 100%);
+    background-size: 16px 16px, auto, auto;
+  }
+  .harbor-stage::before{
+    content:"";
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.18), transparent 55%);
+    pointer-events:none;
+  }
+  /* 지역 이름은 더 이상 맵 위에 떠있는 라벨이 아니라 상단 HUD 안에 표시(모바일 화면 공간 절약) */
+  .hud-area-name{
+    font-size:.68rem;
+    letter-spacing:.5px;
+    color:rgba(245,234,217,.7);
+    margin-top:2px;
+  }
+  /* 다음 지역으로 넘어가는 포탈: 맵 최상단 중앙에 배치 */
+  .area-portal{
+    position:absolute;
+    width:56px;height:56px;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #d9c6ff, #7a4fd1 55%, #3a1f6b 100%);
+    box-shadow:0 0 24px rgba(150,100,255,.85), 0 0 6px rgba(255,255,255,.6) inset;
+    transform:translate(-50%,-50%);
+    z-index:5;
+    animation: portalPulse 1.6s ease-in-out infinite;
+  }
+  /* 이전 지역으로 돌아가는 포탈은 색을 다르게(호박색 계열) 표시해 다음 지역 포탈과 구분 */
+  .area-portal-prev{
+    background:radial-gradient(circle at 40% 35%, #ffe6b8, #d18f2c 55%, #6b3f0f 100%);
+    box-shadow:0 0 24px rgba(230,160,50,.85), 0 0 6px rgba(255,255,255,.6) inset;
+  }
+  @keyframes portalPulse{
+    0%,100%{ transform:translate(-50%,-50%) scale(1); }
+    50%{ transform:translate(-50%,-50%) scale(1.08); }
+  }
+  .portal-label{
+    position:absolute;
+    top:-22px;left:50%;
+    transform:translateX(-50%);
+    font-size:.68rem;
+    color:var(--cream);
+    background:rgba(0,0,0,.4);
+    padding:1px 8px;
+    border-radius:10px;
+    white-space:nowrap;
+  }
+  /* 몬스터는 배경 박스 없이 형태(SVG)만 떠 있는 형태로 표시하고, 초원 위를 자유롭게 돌아다님 */
+  .mon-slot{
+    width:52px;height:52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:absolute;
+    background:transparent;
+    cursor:default;
+  }
+  .mon-slot svg{width:36px;height:36px;}
+  .mon-icon-flip{
+    width:36px;height:36px;
+    transition:transform .12s linear;
+  }
+  .mon-icon-anim{ width:100%; height:100%; }
+  .mon-icon-anim svg{ width:100%; height:100%; display:block; }
+  /* 달팽이류: 느릿느릿 기어가는 느낌(위아래로 살짝 눌렸다 펴짐) */
+  .anim-crawl{ animation: crawlBob 1.6s ease-in-out infinite; }
+  @keyframes crawlBob{
+    0%,100%{ transform: translateY(0) scaleY(1); }
+    50%{ transform: translateY(1.5px) scaleY(.94); }
+  }
+  /* 포푸니: 콩콩 걸어다니는 느낌(위아래로 튀며 살짝 기울어짐) */
+  .anim-walk{ animation: walkBounce .6s ease-in-out infinite; }
+  @keyframes walkBounce{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-3px) rotate(-4deg); }
+  }
+  .carrot-projectile{
+    position:absolute;
+    width:16px;height:16px;
+    left:0;top:0;
+    transition:transform .22s linear;
+    z-index:15;
+    pointer-events:none;
+  }
+  /* 전기 반응 시전 이펙트: 하늘색 원형 테두리 + 지그재그 번개 */
+  .electric-reaction-fx{
+    position:absolute;
+    width:60px;height:60px;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    z-index:12;
+  }
+  .electric-ring-svg{
+    width:100%;height:100%;
+    animation-name: electricPulse;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+  }
+  .electric-ring-svg circle{
+    animation: electricGlow .8s ease-in-out infinite;
+  }
+  .electric-ring-svg g{
+    animation: electricFlicker .18s steps(1) infinite;
+  }
+  @keyframes electricPulse{
+    0%{ opacity:0; transform:scale(.7); }
+    15%{ opacity:1; transform:scale(1.05); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+  @keyframes electricGlow{
+    0%,100%{ filter:drop-shadow(0 0 2px #8fe3ff); opacity:.7; }
+    50%{ filter:drop-shadow(0 0 8px #8fe3ff); opacity:1; }
+  }
+  @keyframes electricFlicker{
+    0%{ opacity:1; }
+    50%{ opacity:.2; }
+    100%{ opacity:.85; }
+  }
+  /* 보스 스킬: 나무 던지기 텔레그래프(범위 예고) */
+  .log-telegraph{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(220,40,40,.25);
+    border:2px solid rgba(220,40,40,.65);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    z-index:8;
+    overflow:hidden;
+  }
+  .log-telegraph-fill{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:rgba(180,15,15,.6);
+    transform:scale(0);
+    animation-name: logTelegraphFill;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  @keyframes logTelegraphFill{
+    from{ transform:scale(0); opacity:.35; }
+    to{ transform:scale(1); opacity:1; }
+  }
+  .mon-hp{
+    position:absolute;
+    bottom:2px;left:4px;right:4px;
+    height:4px;
+    background:rgba(0,0,0,.4);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .mon-hp-fill{height:100%;background:#7bd858;}
+
+  /* ---------- 모바일 HUD: 기존 옆 사이드바 대신 화면 위에 겹쳐지는 얇은 오버레이 ---------- */
+  .hud-top{
+    position:absolute;
+    top:0;left:0;right:0;
+    z-index:6;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+    padding:calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 0 calc(10px + env(safe-area-inset-left));
+    pointer-events:none; /* 빈 공간(포탈이 보이는 상단 중앙)은 터치가 그대로 지나가도록 */
+  }
+  .hud-left{
+    pointer-events:auto;
+    background:rgba(10,8,20,.55);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(245,234,217,.12);
+    border-radius:12px;
+    padding:8px 12px;
+    min-width:150px;
+    max-width:58vw;
+  }
+  .hud-left h3{
+    font-family:'Black Han Sans',sans-serif;
+    margin:0;
+    font-size:.9rem;
+    letter-spacing:.3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .hud-left .hp-bar-outer{ width:100%; margin-top:6px; }
+  .hud-left .gold-row{ margin-top:6px; font-size:.8rem; }
+  .hud-right{
+    pointer-events:auto;
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .hud-icon-btn{
+    width:40px;height:40px;
+    flex-shrink:0;
+    border-radius:10px;
+    border:1px solid rgba(245,234,217,.25);
+    background:rgba(10,8,20,.55);
+    backdrop-filter:blur(6px);
+    color:var(--cream);
+    font-size:1.15rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .hud-icon-btn:active{ transform:scale(.92); background:rgba(232,179,76,.25); }
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:.88rem;
+    padding:6px 0;
+    border-bottom:1px dashed rgba(245,234,217,.12);
+  }
+  .stat-row span:first-child{color:rgba(245,234,217,.6);}
+  .hp-bar-outer{
+    height:10px;
+    background:rgba(0,0,0,.4);
+    border-radius:6px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .hp-bar-inner{height:100%;background:#e2574c;transition:width .2s;}
+  .gold-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+    font-size:.9rem;
+    font-weight:700;
+    color:var(--gold);
+  }
+  /* 경험치 바: 사이드바가 아니라 인게임 화면 맨 아래에 전체 폭으로 표시 */
+  .exp-bar-wrap{
+    flex-shrink:0;
+    padding-bottom:env(safe-area-inset-bottom);
+    background:#151030;
+  }
+  .exp-bar-pct{
+    font-size:.7rem;
+    color:rgba(245,234,217,.8);
+    padding:3px 12px 0;
+    background:#151030;
+  }
+  .exp-bar-fixed{
+    position:relative;
+    height:26px;
+    background:rgba(0,0,0,.55);
+    border-top:1px solid rgba(245,234,217,.15);
+    overflow:hidden;
+  }
+  .exp-bar-fixed-fill{
+    position:absolute;
+    inset:0;
+    width:0%;
+    background:linear-gradient(90deg,#4fa8e0,#6fc6ff);
+    transition:width .2s;
+  }
+  .exp-bar-label{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.78rem;
+    color:var(--cream);
+    z-index:2;
+    text-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+  .player-avatar{
+    position:absolute;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffe9b8, var(--gold) 60%, #a9711f);
+    border:2px solid #3a2409;
+    transform:translate(-50%,-50%);
+    z-index:3;
+    box-shadow:0 0 10px rgba(232,179,76,.8);
+  }
+  .mon-slot.in-range{
+    box-shadow:0 0 0 2px var(--gold) inset;
+  }
+  /* 데미지 표시: 일반(검정 글자)은 흰색 테두리, 그 외(크리티컬/피격)는 검은색 테두리 */
+  .dmg-popup{
+    position:absolute;
+    left:0;top:0;
+    font-family:'Black Han Sans',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    color:#000;
+    -webkit-text-stroke:1px rgba(255,255,255,.8);
+    text-shadow:
+      -1px -1px 0 rgba(255,255,255,.8), 1px -1px 0 rgba(255,255,255,.8),
+      -1px 1px 0 rgba(255,255,255,.8), 1px 1px 0 rgba(255,255,255,.8);
+    pointer-events:none;
+    z-index:20;
+    transform:translate(-50%,-50%);
+    animation: dmgFloat .8s ease-out forwards;
+    white-space:nowrap;
+  }
+  .dmg-popup.taken{
+    color:var(--cream);
+    -webkit-text-stroke:2px #000;
+    text-shadow:
+      -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000,
+      -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000,
+      0 0 4px rgba(0,0,0,.6);
+  }
+  .dmg-popup.crit{
+    color:#ff3b30;
+    font-size:1.5rem;
+    -webkit-text-stroke:2px #000;
+    text-shadow:
+      -2px -2px 0 #000, 2px -2px 0 #000,
+      -2px 2px 0 #000, 2px 2px 0 #000,
+      0 0 10px rgba(255,59,48,.85);
+    animation: dmgFloatCrit .9s ease-out forwards;
+  }
+  @keyframes dmgFloat{
+    0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-160%) scale(1); }
+  }
+  @keyframes dmgFloatCrit{
+    0%{ opacity:1; transform:translate(-50%,-50%) scale(1.5); }
+    25%{ opacity:1; transform:translate(-50%,-80%) scale(1.75); }
+    100%{ opacity:0; transform:translate(-50%,-190%) scale(1.2); }
+  }
+  /* 안내 텍스트는 오른쪽 아래 i 아이콘 + 호버 툴팁으로 대체 */
+  .info-icon-wrap{
+    position:fixed;
+    /* 왼쪽 아래 조이스틱(120px) 바로 위, 오른쪽 아래 스킬 단축키와 겹치지 않는 자리 */
+    left:calc(18px + env(safe-area-inset-left));
+    bottom:calc(148px + env(safe-area-inset-bottom));
+    z-index:60;
+  }
+  .info-icon{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(245,234,217,.4);
+    color:var(--cream);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Black Han Sans',sans-serif;
+    font-size:.95rem;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .info-tooltip{
+    position:absolute;
+    left:0;
+    bottom:42px;
+    width:min(260px,70vw);
+    background:rgba(0,0,0,.88);
+    color:var(--cream);
+    font-size:.72rem;
+    line-height:1.5;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(245,234,217,.2);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s;
+  }
+  .info-icon-wrap:hover .info-tooltip, .info-icon-wrap.open .info-tooltip{ opacity:1; }
+  .btn-sm{padding:8px 10px;font-size:.78rem;border-radius:6px;min-height:32px;}
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+    padding-top:calc(20px + env(safe-area-inset-top));
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    padding-left:calc(20px + env(safe-area-inset-left));
+    padding-right:calc(20px + env(safe-area-inset-right));
+  }
+  .modal-overlay.active{display:flex;}
+  .modal-card{
+    background:#1a1533;
+    border:1px solid rgba(245,234,217,.15);
+    border-radius:16px;
+    padding:22px;
+    width:min(380px,92vw);
+    max-height:82vh;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .modal-card h2{
+    font-family:'Black Han Sans',sans-serif;
+    margin:0 0 6px;
+    font-size:1.3rem;
+  }
+  .stat-alloc-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:.88rem;
+    padding:8px 0;
+    border-bottom:1px dashed rgba(245,234,217,.12);
+    gap:10px;
+  }
+  .stat-alloc-row .stat-desc{
+    display:block;
+    font-size:.7rem;
+    color:rgba(245,234,217,.45);
+    margin-top:2px;
+  }
+  .modal-card.wide{ width:min(640px,95vw); }
+  .inv-equip-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .inv-equip-col{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .equip-slot{
+    width:60px;height:66px;
+    border:1px solid rgba(245,234,217,.25);
+    border-radius:8px;
+    background:rgba(0,0,0,.3);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:2px;
+    font-size:.6rem;
+    line-height:1.2;
+    color:rgba(245,234,217,.45);
+    cursor:pointer;
+    padding:3px;
+    user-select:none;
+  }
+  .equip-slot.filled{
+    color:var(--cream);
+    border-color:var(--gold);
+    background:rgba(232,179,76,.14);
+  }
+  .slot-label-empty{
+    font-size:.6rem;
+    color:rgba(245,234,217,.4);
+  }
+  .item-icon{
+    width:30px;height:30px;
+    flex-shrink:0;
+  }
+  .item-icon svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .item-name{
+    font-size:.56rem;
+    line-height:1.1;
+    font-weight:700;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .inv-avatar-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    flex:1;
+    min-width:100px;
+  }
+  .inv-avatar-circle{
+    width:92px;height:92px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffe9b8, var(--gold) 60%, #a9711f);
+    border:3px solid #3a2409;
+    box-shadow:0 0 16px rgba(232,179,76,.7);
+  }
+  .inv-avatar-label{
+    font-size:.78rem;
+    color:rgba(245,234,217,.7);
+  }
+  .inv-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    grid-template-rows:repeat(4,1fr);
+    gap:8px;
+  }
+  .inv-cell{
+    aspect-ratio:1/1;
+    border:1px solid rgba(245,234,217,.2);
+    border-radius:8px;
+    background:rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:2px;
+    font-size:.6rem;
+    line-height:1.15;
+    color:rgba(245,234,217,.6);
+    cursor:pointer;
+    padding:3px;
+    user-select:none;
+  }
+  .inv-cell.filled{
+    color:var(--cream);
+    border-color:rgba(245,234,217,.4);
+  }
+  .inv-cell.box-item{
+    border-color:var(--gold);
+    color:var(--gold);
+    font-weight:700;
+  }
+  .item-tooltip{
+    position:fixed;
+    z-index:200;
+    max-width:250px;
+    background:rgba(10,8,20,.96);
+    border:1px solid rgba(232,179,76,.5);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:.7rem;
+    line-height:1.5;
+    color:var(--cream);
+    pointer-events:none;
+    box-shadow:0 6px 18px rgba(0,0,0,.5);
+  }
+  .item-tt-name{
+    font-family:'Black Han Sans',sans-serif;
+    font-size:.85rem;
+    color:var(--gold);
+    margin-bottom:4px;
+  }
+  .item-tt-desc{
+    color:rgba(245,234,217,.75);
+    margin-bottom:6px;
+  }
+  .item-tt-stats{
+    color:var(--cream);
+    font-weight:700;
+    margin-bottom:2px;
+  }
+  .item-tt-setname{
+    font-size:.72rem;
+    color:var(--gold);
+    margin-top:6px;
+    border-top:1px dashed rgba(245,234,217,.2);
+    padding-top:6px;
+  }
+  .set-tier-line{
+    color:rgba(245,234,217,.5);
+  }
+  .set-tier-line.active{
+    color:#7CFFB2;
+    font-weight:700;
+  }
+  .skill-modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin-bottom:2px;
+  }
+  .skill-modal-header h2{ margin:0; min-width:120px; text-align:center; }
+  .skill-arrow{
+    width:40px;height:40px;
+    flex-shrink:0;
+    border-radius:50%;
+    border:1px solid rgba(245,234,217,.3);
+    background:rgba(0,0,0,.3);
+    color:var(--cream);
+    font-size:1.2rem;
+    line-height:1;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .skill-arrow:disabled{
+    opacity:.25;
+    cursor:default;
+  }
+  .skill-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .skill-card{
+    width:104px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:10px 8px;
+    border:1px solid rgba(245,234,217,.2);
+    border-radius:10px;
+    background:rgba(0,0,0,.25);
+  }
+  .skill-icon-wrap{
+    width:50px;height:50px;
+    position:relative;
+  }
+  .skill-icon-wrap svg{ width:100%; height:100%; display:block; }
+  .skill-lock-overlay{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.62);
+    border-radius:50%;
+  }
+  .skill-lock-overlay svg{ width:100%; height:100%; }
+  .skill-name{
+    font-size:.66rem;
+    font-weight:700;
+    text-align:center;
+    line-height:1.2;
+  }
+  .skill-level{
+    font-size:.62rem;
+    color:rgba(245,234,217,.6);
+  }
+  .skill-req{
+    font-size:.6rem;
+    color:rgba(245,234,217,.45);
+    text-align:center;
+  }
+  .skill-card{ position:relative; }
+  .skill-key-badge{
+    position:absolute;
+    left:6px; bottom:4px;
+    font-size:.56rem;
+    color:rgba(245,234,217,.5);
+  }
+  /* 스킬 단축키 바: 모바일에서는 게임 화면 위 우측 하단에 떠있는 탭 버튼 묶음으로 배치 */
+  .hotbar-row{
+    position:absolute;
+    right:calc(14px + env(safe-area-inset-right));
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    z-index:6;
+    display:grid;
+    grid-template-columns:repeat(3, 50px);
+    grid-auto-rows:50px;
+    gap:8px;
+    pointer-events:auto;
+  }
+  .hotbar-slot{
+    position:relative;
+    width:50px;height:50px;
+    border:1px solid rgba(245,234,217,.35);
+    border-radius:12px;
+    background:rgba(10,8,20,.55);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .hotbar-slot.has-skill:active{ transform:scale(.92); background:rgba(232,179,76,.3); }
+  .hotbar-key{
+    position:absolute;
+    top:1px;left:3px;
+    font-size:.6rem;
+    color:rgba(245,234,217,.6);
+    font-weight:700;
+    z-index:2;
+  }
+  .hotbar-icon{ width:30px;height:30px; }
+  .hotbar-icon svg{ width:100%; height:100%; display:block; }
+  .hotbar-cd-overlay{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.72);
+    border-radius:7px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Black Han Sans',sans-serif;
+    font-size:1rem;
+    color:#fff;
+    z-index:3;
+  }
+  .hotbar-assign-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+  }
+  .hotbar-assign-slot{ cursor:pointer; }
+  .hotbar-assign-slot:hover{ border-color:var(--gold); }
+
+  /* ---------- 가상 조이스틱(모바일 이동 조작) ---------- */
+  .joystick-zone{
+    position:absolute;
+    left:calc(18px + env(safe-area-inset-left));
+    bottom:calc(18px + env(safe-area-inset-bottom));
+    width:120px;height:120px;
+    z-index:6;
+    touch-action:none;
+  }
+  .joystick-base{
+    position:absolute; inset:0;
+    border-radius:50%;
+    background:rgba(0,0,0,.28);
+    border:2px solid rgba(245,234,217,.3);
+  }
+  .joystick-knob{
+    position:absolute;
+    width:52px;height:52px;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:rgba(245,234,217,.55);
+    border:2px solid rgba(245,234,217,.85);
+    box-shadow:0 0 10px rgba(0,0,0,.35);
+    pointer-events:none;
+  }
+  .joystick-zone.active .joystick-base{ background:rgba(0,0,0,.42); border-color:var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="screen active" id="screen-title">
+  <div class="title-card">
+    <h1 class="game-title">솔 야누스 키우기</h1>
+    <p class="game-subtitle">다른 차원으로의 모험</p>
+    <div class="title-buttons">
+      <button class="btn btn-primary" id="btn-go-login">로그인</button>
+      <button class="btn btn-secondary" id="btn-go-signup">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-login">
+  <div class="auth-card">
+    <h2>로그인</h2>
+    <label>아이디<input type="text" id="login-id" autocomplete="off"></label>
+    <label>비밀번호<input type="password" id="login-pw"></label>
+    <p class="error-msg" id="login-error" hidden></p>
+    <div class="auth-buttons">
+      <button class="btn btn-ghost" id="login-back">뒤로</button>
+      <button class="btn btn-primary" id="login-submit">로그인</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-signup">
+  <div class="auth-card">
+    <h2>회원가입</h2>
+    <label>이름<input type="text" id="signup-name"></label>
+    <label>생년월일<input type="date" id="signup-birth"></label>
+    <label>아이디<input type="text" id="signup-id" autocomplete="off"></label>
+    <label>비밀번호<input type="password" id="signup-pw"></label>
+    <label>비밀번호 확인<input type="password" id="signup-pw2"></label>
+    <p class="match-msg" id="signup-pw-match" hidden></p>
+    <p class="error-msg" id="signup-error" hidden></p>
+    <div class="auth-buttons">
+      <button class="btn btn-ghost" id="signup-back">뒤로</button>
+      <button class="btn btn-primary" id="signup-submit">가입하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-game">
+  <div class="game-main">
+    <div class="harbor-stage" id="harbor-stage"></div>
+
+    <!-- 모바일 상단 HUD: 기존 옆 사이드바 대신 지도 위에 겹쳐지는 얇은 오버레이로 표시 -->
+    <div class="hud-top" id="hud-top">
+      <div class="hud-left">
+        <h3 id="char-name-label">모험가</h3>
+        <div class="hp-bar-outer"><div class="hp-bar-inner" id="hp-bar"></div></div>
+        <div style="font-size:.68rem;margin-top:3px;color:rgba(245,234,217,.6);" id="hp-text">150 / 150</div>
+        <div class="gold-row">
+          <svg viewBox="0 0 20 20" width="16" height="16">
+            <circle cx="10" cy="10" r="8.5" fill="#f0c34d" stroke="#a9711f" stroke-width="1.5"/>
+            <circle cx="10" cy="10" r="5.5" fill="none" stroke="#a9711f" stroke-width="1"/>
+            <text x="10" y="13.5" text-anchor="middle" font-size="7" font-weight="700" fill="#a9711f">G</text>
+          </svg>
+          <span id="gold-amount">0</span>
+        </div>
+        <div class="hud-area-name" id="hud-area-name"></div>
+      </div>
+      <div class="hud-right">
+        <button class="hud-icon-btn" id="btn-open-stat-window" aria-label="스탯창">
+          <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="12" width="4" height="8" rx="1" fill="currentColor"/><rect x="10" y="7" width="4" height="13" rx="1" fill="currentColor"/><rect x="16" y="3" width="4" height="17" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="hud-icon-btn" id="btn-open-char-info" aria-label="캐릭터 정보">
+          <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.2" r="1.15" fill="currentColor"/><rect x="10.8" y="10.8" width="2.4" height="7" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="hud-icon-btn" id="btn-open-inventory" aria-label="인벤토리">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 8 L8.3 4.5 a2 2 0 0 1 1.9-1.3h3.6a2 2 0 0 1 1.9 1.3L17 8" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4.5" y="8" width="15" height="12" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="hud-icon-btn" id="btn-open-skills" aria-label="스킬">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3 L14.4 9.2 L21 9.8 L16 14.1 L17.6 20.6 L12 17.1 L6.4 20.6 L8 14.1 L3 9.8 L9.6 9.2 Z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 이동용 가상 조이스틱(왼쪽 아래). PC에서는 기존처럼 화살표 키도 계속 사용 가능 -->
+    <div class="joystick-zone" id="joystick-zone">
+      <div class="joystick-base"></div>
+      <div class="joystick-knob" id="joystick-knob"></div>
+    </div>
+
+    <!-- 스킬 단축키(오른쪽 아래). 탭하면 바로 시전됨 -->
+    <div class="hotbar-row" id="hotbar"></div>
+  </div>
+  <div class="exp-bar-wrap">
+    <div class="exp-bar-pct" id="exp-bar-pct">0.00%</div>
+    <div class="exp-bar-fixed">
+      <div class="exp-bar-fixed-fill" id="exp-bar-fixed-fill"></div>
+      <div class="exp-bar-label" id="exp-bar-label">EXP 0 / 100</div>
+    </div>
+  </div>
+  <div class="info-icon-wrap" id="info-icon-wrap">
+    <div class="info-icon">i</div>
+    <div class="info-tooltip">
+      화면 왼쪽 아래 조이스틱으로 야누스를 이동할 수 있어요(PC에서는 화살표 키도 가능). 야누스의 공격 범위는 중심 100px이며, 범위 안 몬스터는 테두리로 표시됩니다. 몬스터는 배경 박스 없이 형태만 표시되고 스폰 위치 근처를 랜덤으로 돌아다니며, 몬스터 자체의 사거리 안에 야누스가 있으면 공격 주기마다 반격을 받습니다. 맵 위쪽 중앙 포탈에 닿으면 다음 지역으로 이동해요. 오른쪽 아래 스킬 버튼을 탭하면 장착된 스킬을 사용할 수 있어요.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-stat">
+  <div class="modal-card">
+    <h2>스탯창</h2>
+    <p style="font-size:.8rem;color:rgba(245,234,217,.6);margin:0 0 14px;" id="stat-points-left">보유 포인트: 0</p>
+    <div id="stat-alloc-list"></div>
+    <button class="btn btn-ghost" id="modal-stat-close" style="margin-top:18px;width:100%;">닫기</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-charinfo">
+  <div class="modal-card">
+    <h2>캐릭터 정보</h2>
+    <div id="charinfo-list"></div>
+    <button class="btn btn-ghost" id="modal-charinfo-close" style="margin-top:18px;width:100%;">닫기</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-inventory">
+  <div class="modal-card wide">
+    <h2>인벤토리</h2>
+    <div class="inv-equip-row">
+      <div class="inv-equip-col" id="equip-col-left"></div>
+      <div class="inv-avatar-wrap">
+        <div class="inv-avatar-circle"></div>
+        <div class="inv-avatar-label">솔 야누스</div>
+      </div>
+      <div class="inv-equip-col" id="equip-col-right"></div>
+    </div>
+    <div class="inv-grid" id="inv-grid"></div>
+    <p style="font-size:.68rem;color:rgba(245,234,217,.45);margin:12px 0 0;">장비는 더블클릭으로 장착/해제할 수 있어요. 상자류 아이템은 더블클릭하면 열려요.</p>
+    <button class="btn btn-ghost" id="modal-inventory-close" style="margin-top:14px;width:100%;">닫기</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-skills">
+  <div class="modal-card wide">
+    <div class="skill-modal-header">
+      <button class="skill-arrow" id="skill-arrow-left">‹</button>
+      <h2 id="skill-panel-title">액티브 스킬</h2>
+      <button class="skill-arrow" id="skill-arrow-right">›</button>
+    </div>
+    <p style="font-size:.78rem;color:rgba(245,234,217,.6);margin:0 0 14px;" id="skill-points-left">보유 포인트: 0</p>
+    <div class="skill-grid" id="skill-grid"></div>
+    <button class="btn btn-ghost" id="modal-skills-close" style="margin-top:16px;width:100%;">닫기</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-hotbar-assign">
+  <div class="modal-card">
+    <h2>장착 위치 선택</h2>
+    <p style="font-size:.75rem;color:rgba(245,234,217,.6);margin:0 0 14px;" id="hotbar-assign-skill-name"></p>
+    <div class="hotbar-assign-grid" id="hotbar-assign-grid"></div>
+    <button class="btn btn-ghost" id="modal-hotbar-assign-close" style="margin-top:16px;width:100%;">닫기</button>
+  </div>
+</div>
+
+<div class="item-tooltip" id="item-tooltip" style="display:none;"></div>
+
+<script>
+
+(function(){
+  "use strict";
+
+  // ---------------- 화면 전환 ----------------
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+  document.getElementById('btn-go-login').onclick = function(){ clearAuthErrors(); showScreen('screen-login'); };
+  document.getElementById('btn-go-signup').onclick = function(){ clearAuthErrors(); showScreen('screen-signup'); };
+  document.getElementById('login-back').onclick = function(){ showScreen('screen-title'); };
+  document.getElementById('signup-back').onclick = function(){ showScreen('screen-title'); };
+
+  function clearAuthErrors(){
+    document.getElementById('login-error').hidden = true;
+    document.getElementById('signup-error').hidden = true;
+    document.getElementById('signup-pw-match').hidden = true;
+  }
+
+  // ---------------- 비밀번호 확인 실시간 일치 표시 ----------------
+  var pwEl = document.getElementById('signup-pw');
+  var pw2El = document.getElementById('signup-pw2');
+  var pwMatchEl = document.getElementById('signup-pw-match');
+
+  function updatePwMatch(){
+    var pw = pwEl.value;
+    var pw2 = pw2El.value;
+    pwMatchEl.hidden = false;
+    if(pw === ''){
+      pwMatchEl.textContent = '비밀번호를 먼저 입력해주세요.';
+      pwMatchEl.style.color = 'rgba(245,234,217,.6)';
+    }else if(pw === pw2){
+      pwMatchEl.textContent = '✓ 비밀번호가 일치합니다.';
+      pwMatchEl.style.color = '#7bd858';
+    }else{
+      pwMatchEl.textContent = '✗ 비밀번호가 일치하지 않습니다.';
+      pwMatchEl.style.color = 'var(--danger)';
+    }
+  }
+  // 비밀번호 확인 칸을 클릭(포커스)하는 즉시 현재 일치 상태를 보여줌
+  pw2El.addEventListener('focus', updatePwMatch);
+  pw2El.addEventListener('input', updatePwMatch);
+  pwEl.addEventListener('input', function(){
+    if(!pwMatchEl.hidden) updatePwMatch();
+  });
+
+  // ---------------- 계정 저장/조회 ----------------
+  // 참고: 이 프로토타입은 데모용 계정 시스템입니다. 비밀번호를 평문으로 저장하므로
+  // 실제 서비스에는 쓰지 말고, 혼자 테스트하는 용도로만 사용하세요.
+  //
+  // 저장소 우선순위: (1) window.storage가 있으면 그것을 사용(클로드 아티팩트 미리보기 등에서
+  // 계속 동작하도록 호환성 유지), (2) 없으면 브라우저/모바일 웹뷰의 localStorage를 사용해
+  // 실제로 재실행/재접속해도 데이터가 남도록 함, (3) 그마저도 불가능한 극히 드문 환경(프라이빗
+  // 모드 등으로 localStorage 접근이 막힌 경우)에서만 세션 메모리 폴백으로 최소 동작을 보장.
+  var memoryFallback = {};
+  var usingFallback = false;
+
+  function hasWindowStorage(){
+    return typeof window.storage !== 'undefined' && window.storage &&
+      typeof window.storage.get === 'function' && typeof window.storage.set === 'function';
+  }
+  function hasLocalStorage(){
+    try{
+      var testKey = '__sol_janus_test__';
+      window.localStorage.setItem(testKey, '1');
+      window.localStorage.removeItem(testKey);
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  async function storageGetRaw(key){
+    if(hasWindowStorage()){
+      var res = await window.storage.get(key, false);
+      return res ? res.value : null;
+    }
+    if(hasLocalStorage()){
+      return window.localStorage.getItem(key);
+    }
+    if(Object.prototype.hasOwnProperty.call(memoryFallback, key)) return memoryFallback[key];
+    return null;
+  }
+  async function storageSetRaw(key, value){
+    if(hasWindowStorage()){
+      await window.storage.set(key, value, false);
+      return;
+    }
+    if(hasLocalStorage()){
+      window.localStorage.setItem(key, value);
+      return;
+    }
+    usingFallback = true;
+    memoryFallback[key] = value;
+  }
+
+  async function getAccount(id){
+    try{
+      var raw = await storageGetRaw('account:' + id);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){
+      console.error('getAccount error', e);
+      return null;
+    }
+  }
+  async function saveAccount(acc){
+    var key = 'account:' + acc.id;
+    var value = JSON.stringify(acc);
+    try{
+      await storageSetRaw(key, value);
+    }catch(e){
+      console.error('saveAccount error', e);
+      usingFallback = true;
+      memoryFallback[key] = value;
+    }
+  }
+  async function getCharacter(id){
+    try{
+      var raw = await storageGetRaw('character:' + id);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){
+      console.error('getCharacter error', e);
+      return null;
+    }
+  }
+  async function saveCharacter(id, ch){
+    var key = 'character:' + id;
+    var value = JSON.stringify(ch);
+    try{
+      await storageSetRaw(key, value);
+    }catch(e){
+      usingFallback = true;
+      memoryFallback[key] = value;
+    }
+  }
+
+  // ---------------- 캐릭터 스탯 규칙(레벨/스탯/경험치) ----------------
+  // 기본(고정) 스탯: 캐릭터 생성 시 이 값에서 시작하고, STR/DEX/LUK 투자분이 더해져 최종 스탯이 됨
+  var BASE_STATS = {
+    baseAtk: 10,      // 기본 공격력
+    baseMaxHp: 150,
+    baseDef: 1,
+    baseRegen: 3,
+    baseAccuracy: 5,
+    critChance: 5,        // 크리티컬 확률(%)
+    critDamageBase: 20,   // 크리티컬 데미지(%) - 기본 배율 1에서 20% 증가
+    baseProficiency: 30   // 유저 기본 숙련도(%) - 공격력 대비 최소 데미지 비율
+  };
+
+  var MONSTER_PROFICIENCY = 70; // 몬스터 공통 숙련도(%). 개별 몬스터별로 다르게 두지 않고 전체 공통으로 심플하게 적용
+
+  // 숙련도 기반 데미지 굴림: baseAtk의 (숙련도%)~100% 사이에서 정수로 무작위 산출
+  // 예) 공격력 30, 숙련도 30% -> 9~30 사이에서 하나를 뽑음
+  function rollDamageWithProficiency(baseAtk, proficiencyPercent){
+    var minDmg = Math.floor(baseAtk * proficiencyPercent / 100);
+    if(minDmg > baseAtk) minDmg = baseAtk;
+    if(minDmg < 0) minDmg = 0;
+    return minDmg + Math.floor(Math.random() * (baseAtk - minDmg + 1));
+  }
+
+  // 사이드바/캐릭터 정보 등에 표시할 "최소~최대" 공격력 문자열
+  function formatAtkRange(ch){
+    var minDmg = Math.floor(ch.atk * ch.proficiency / 100);
+    return minDmg + '~' + ch.atk;
+  }
+
+  // 스탯 1포인트당 효과
+  var STAT_RULES = {
+    strAtkPerPoint: 1,      // STR: 공격력 증가
+    strHpPerPoint: 5,       // STR: 체력 증가
+    strRegenPer: 10,        // STR: 이 값(10)마다 체력 재생 증가
+    strRegenAmount: 2,      // STR: strRegenPer 마다 체력 재생 +2
+    dexAccuracyPerPoint: 1, // DEX: 명중 증가
+    dexAtkPerPoint: 0.1,    // DEX: 공격력 소폭 증가
+    dexDefPerPoint: 0.5,    // DEX: 방어력 증가
+    lukCritDmgPerPoint: 0.1,// LUK: 크리티컬 데미지 소폭 증가(%)
+    lukCap: 500,            // LUK 최대 투자 가능치
+    lukCapBonus: 50         // LUK 500 달성 시 추가 크리티컬 데미지(%)
+  };
+
+  var STAT_POINTS_PER_LEVEL = 5; // 레벨업 시 지급되는 스탯 포인트
+
+  // 경험치 테이블: 해당 레벨에서 다음 레벨로 올라가기 위해 필요한 경험치
+  var EXP_TABLE = {
+    1:100, 2:140, 3:185, 4:239, 5:300, 6:384, 7:475, 8:584, 9:701, 10:849,
+    11:1100, 12:1314, 13:1599, 14:1854, 15:2199,
+    // 16: 15레벨 값의 1.45배(반올림)
+    16:3189,
+    // 17~29: 이전 레벨 값의 1.14배(반올림)
+    17:3635, 18:4144, 19:4724, 20:5385, 21:6139, 22:6998, 23:7978, 24:9095, 25:10368,
+    26:11820, 27:13475, 28:15361, 29:17512,
+    // 30: 29레벨 값의 1.58배(반올림)
+    30:27669,
+    // 31~50: 이전 레벨 값의 1.18배(반올림)
+    31:32649, 32:38526, 33:45461, 34:53644, 35:63300, 36:74694, 37:88139, 38:104004, 39:122725, 40:144816,
+    41:170883, 42:201642, 43:237938, 44:280767, 45:331305, 46:390940, 47:461309, 48:544345, 49:642327, 50:757946
+  };
+
+  function requiredExpForLevel(level){
+    return Object.prototype.hasOwnProperty.call(EXP_TABLE, level) ? EXP_TABLE[level] : null;
+  }
+
+  // STR/DEX/LUK 및 레벨을 기준으로 공격력/최대체력/명중률/방어력/크리티컬 데미지를 다시 계산
+  var EQUIP_SLOT_KEYS = ['hat','top','bottom','gloves','shoes','cape','weapon','ring1','ring2','ring3','ring4','necklace','earring'];
+  var INVENTORY_SIZE = 20; // 5 x 4
+
+  // 장착 중인 장비의 스탯 합(특정 statKey 기준)을 더함
+  function sumEquipmentBonus(ch, statKey){
+    var total = 0;
+    EQUIP_SLOT_KEYS.forEach(function(key){
+      var item = ch.equipment[key];
+      if(item && item.stats && typeof item.stats[statKey] === 'number'){
+        total += item.stats[statKey];
+      }
+    });
+    return total;
+  }
+
+  // ---------------- 세트 효과 ----------------
+  // 장착한 세트 아이템 개수에 따라 2/3/5세트 보너스가 누적 적용됨(3세트 달성 시 2세트 보너스도 함께 유지)
+  var SET_DEFS = {
+    starter_set: {
+      label: '초심자 세트',
+      totalPieces: 5,
+      tiers: [
+        { count:2, str:3, dex:3, luk:3, maxHp:70 },
+        { count:3, str:5, dex:5, luk:5, atk:5 },
+        { count:5, str:7, dex:7, luk:7, atk:5 }
+      ]
+    }
+  };
+
+  function countEquippedBySet(ch, setId){
+    var n = 0;
+    EQUIP_SLOT_KEYS.forEach(function(key){
+      var item = ch.equipment[key];
+      if(item && item.setId === setId) n++;
+    });
+    return n;
+  }
+
+  function activeSetTiers(ch, setId){
+    var def = SET_DEFS[setId];
+    if(!def) return [];
+    var count = countEquippedBySet(ch, setId);
+    return def.tiers.filter(function(t){ return count >= t.count; });
+  }
+
+  function sumSetBonus(ch, statKey){
+    var total = 0;
+    Object.keys(SET_DEFS).forEach(function(setId){
+      activeSetTiers(ch, setId).forEach(function(tier){
+        if(typeof tier[statKey] === 'number') total += tier[statKey];
+      });
+    });
+    return total;
+  }
+
+  function recalcDerivedStats(ch){
+    var equipStr = sumEquipmentBonus(ch, 'str');
+    var equipDex = sumEquipmentBonus(ch, 'dex');
+    var equipLuk = sumEquipmentBonus(ch, 'luk');
+    var equipDef = sumEquipmentBonus(ch, 'def');
+    var equipAtk = sumEquipmentBonus(ch, 'atk');
+
+    var setStr = sumSetBonus(ch, 'str');
+    var setDex = sumSetBonus(ch, 'dex');
+    var setLuk = sumSetBonus(ch, 'luk');
+    var setMaxHp = sumSetBonus(ch, 'maxHp');
+    var setAtk = sumSetBonus(ch, 'atk');
+
+    var passive = getPassiveBonus(ch);
+
+    var effStr = ch.str + equipStr + setStr;
+    var effDex = ch.dex + equipDex + setDex;
+    var effLuk = ch.luk + equipLuk + setLuk;
+
+    ch.maxHp = BASE_STATS.baseMaxHp + effStr * STAT_RULES.strHpPerPoint + setMaxHp;
+    ch.atk = Math.round(BASE_STATS.baseAtk + effStr * STAT_RULES.strAtkPerPoint + effDex * STAT_RULES.dexAtkPerPoint + equipAtk + setAtk + passive.atk);
+    ch.def = Math.round((BASE_STATS.baseDef + effDex * STAT_RULES.dexDefPerPoint + equipDef) * 10) / 10;
+    ch.regen = BASE_STATS.baseRegen + Math.floor(effStr / STAT_RULES.strRegenPer) * STAT_RULES.strRegenAmount;
+    ch.accuracy = BASE_STATS.baseAccuracy + effDex * STAT_RULES.dexAccuracyPerPoint;
+    ch.critChance = BASE_STATS.critChance;
+    var critDmg = BASE_STATS.critDamageBase + effLuk * STAT_RULES.lukCritDmgPerPoint;
+    if(effLuk >= STAT_RULES.lukCap) critDmg += STAT_RULES.lukCapBonus;
+    ch.critDamage = Math.round(critDmg * 10) / 10;
+    if(typeof ch.hp === 'number' && ch.hp > ch.maxHp) ch.hp = ch.maxHp;
+  }
+
+  // ---------------- 스킬 ----------------
+  // 액티브/패시브 스킬 정의. 나중에 더 추가될 예정이라 스킬 하나가 화면을 다 차지하지 않게 카드 형태로 관리.
+  var SKILL_DEFS = {
+    active: [
+      {
+        id:'electric_reaction',
+        name:'전기 반응',
+        type:'active',
+        reqLevel:3,       // 필요 솔 야누스 레벨
+        maxLevel:10,      // 마스터 스킬 레벨
+        baseTargets:6,
+        baseHits:3,
+        basePercent:32,       // 스킬 레벨 1 기준 데미지 비율(%)
+        percentPerLevel:2,    // 레벨 1당 +2%(설명에는 노출하지 않음)
+        cooldownMs:4000,      // 쿨타임 4초
+        castTimeMs:800,       // 시전시간 0.8초(이 시간이 지난 뒤 실제 효과 적용)
+        postDelayMs:300,      // 후딜레이 0.3초(시전 종료 후 바로 다시 못 쓰는 딜레이)
+        flavorText:'솔 야누스 테두리에 즉시 전력을 공급해 주변 적을 공격한다.'
+      }
+    ],
+    passive: [
+      {
+        id:'janus_extension_mk1',
+        name:'야누스 익스텐션 MK1',
+        type:'passive',
+        reqLevel:5,       // 필요 솔 야누스 레벨
+        maxLevel:15,      // 마스터 스킬 레벨
+        atkPerLevel:1,
+        rangePerLevelPx:2,
+        targetsPerFiveLevels:1, // 5레벨당 공격 마릿수 +1(1레벨부터 첫 +1 적용)
+        flavorText:'솔 야누스 성능을 강화시켜 위력과 최대 공격 마릿수, 공격 범위가 증가한다.'
+      }
+    ]
+  };
+  var SKILL_POINTS_PER_LEVEL = 3; // 레벨업 시 액티브/패시브 각각 지급되는 포인트
+  var HOTBAR_KEYS = ['z', 'x', 'c', 'a', 's', 'd']; // 스킬 칸(0~5)과 1:1로 매칭되는 기본 단축키
+  var HOTBAR_SIZE = HOTBAR_KEYS.length;
+
+  function makeEmptyHotbar(){
+    var hb = [];
+    for(var i = 0; i < HOTBAR_SIZE; i++) hb.push(null);
+    return hb;
+  }
+
+  // 스킬 시스템이 중간에 추가되면서 그전에 레벨업한 캐릭터는 스킬 포인트를 못 받았던 문제를 보정.
+  // 목표치(레벨 x 3)에서 이미 투자한(스킬 레벨) 만큼을 뺀 값보다 보유 포인트가 적으면 부족분만 채워줌.
+  function reconcileSkillPoints(ch){
+    var activeSpent = SKILL_DEFS.active.reduce(function(sum, def){ return sum + (ch.skills[def.id] || 0); }, 0);
+    var passiveSpent = SKILL_DEFS.passive.reduce(function(sum, def){ return sum + (ch.skills[def.id] || 0); }, 0);
+    var correctActiveTotal = ch.level * SKILL_POINTS_PER_LEVEL;
+    var correctPassiveTotal = ch.level * SKILL_POINTS_PER_LEVEL;
+    var neededActive = correctActiveTotal - activeSpent;
+    var neededPassive = correctPassiveTotal - passiveSpent;
+    if(neededActive > ch.activeSkillPoints) ch.activeSkillPoints = neededActive;
+    if(neededPassive > ch.passiveSkillPoints) ch.passiveSkillPoints = neededPassive;
+  }
+
+  function findSkillDef(id){
+    var all = SKILL_DEFS.active.concat(SKILL_DEFS.passive);
+    for(var i = 0; i < all.length; i++){
+      if(all[i].id === id) return all[i];
+    }
+    return null;
+  }
+
+  // 패시브 스킬(야누스 익스텐션 MK1)의 현재 레벨 기준 보너스
+  function getPassiveBonus(ch){
+    var def = findSkillDef('janus_extension_mk1');
+    var lvl = (ch.skills && ch.skills.janus_extension_mk1) || 0;
+    if(!def || lvl <= 0) return { atk:0, range:0, targets:0 };
+    return {
+      atk: lvl * def.atkPerLevel,
+      range: lvl * def.rangePerLevelPx,
+      targets: Math.floor((lvl - 1) / 5) * def.targetsPerFiveLevels + def.targetsPerFiveLevels
+    };
+  }
+
+  // 초기 장비 지원상자를 열면 지급되는 장비 5종
+  function makeStarterItems(){
+    return [
+      { id:'starter_top', name:'초심자의 상의', slotType:'top', setId:'starter_set', stats:{ str:1, dex:1, luk:1, def:2 } },
+      { id:'starter_bottom', name:'초심자의 하의', slotType:'bottom', setId:'starter_set', stats:{ str:1, dex:1, luk:1, def:2 } },
+      { id:'starter_shoes', name:'초심자의 신발', slotType:'shoes', setId:'starter_set', stats:{ str:1, dex:1, luk:1, def:1 } },
+      { id:'starter_hat', name:'초심자의 모자', slotType:'hat', setId:'starter_set', stats:{ str:1, dex:1, luk:1, def:1 } },
+      { id:'starter_weapon', name:'초심자의 엔진 1형', slotType:'weapon', setId:'starter_set', stats:{ str:3, atk:12 } }
+    ];
+  }
+
+  // ---------------- 아이템 아이콘(SVG) ----------------
+  // 초심자 장비: 천 옷 느낌의 사선 텍스처를 넣은 실루엣 아이콘
+  function clothPatternDefs(patId, baseColor){
+    return '<defs><pattern id="' + patId + '" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">' +
+      '<rect width="6" height="6" fill="' + baseColor + '"/>' +
+      '<line x1="0" y1="0" x2="0" y2="6" stroke="rgba(0,0,0,.16)" stroke-width="1.6"/>' +
+      '</pattern></defs>';
+  }
+
+  function clothIconSvg(shapeKind, patId, baseColor){
+    var pat = clothPatternDefs(patId, baseColor);
+    var shape = '';
+    if(shapeKind === 'hat'){
+      shape = '<path d="M7 27 Q20 8 33 27 Z" fill="url(#' + patId + ')" stroke="#4a3420" stroke-width="1.4"/>' +
+        '<rect x="6" y="26" width="28" height="5" rx="2.2" fill="#4a3420"/>';
+    }else if(shapeKind === 'top'){
+      shape = '<path d="M14 8 L9 14 L13.5 18.5 L14 34 H26 L26.5 18.5 L31 14 L26 8 L20 11 Z" ' +
+        'fill="url(#' + patId + ')" stroke="#4a3420" stroke-width="1.3"/>';
+    }else if(shapeKind === 'bottom'){
+      shape = '<path d="M12 7 H28 L27.2 34 H21.3 L20 17.5 L18.7 34 H12.8 Z" ' +
+        'fill="url(#' + patId + ')" stroke="#4a3420" stroke-width="1.3"/>';
+    }else if(shapeKind === 'shoes'){
+      shape = '<path d="M14 8 H22 V19 L28 21.5 Q33 23 33 27 V30 H10 V8 Z" ' +
+        'fill="url(#' + patId + ')" stroke="#4a3420" stroke-width="1.3"/>';
+    }
+    return '<svg viewBox="0 0 40 40">' + pat + shape + '</svg>';
+  }
+
+  // 초심자의 엔진 1형: 천이 아닌 금속 동력장치 느낌의 톱니바퀴 아이콘
+  function engineIconSvg(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<g stroke="#2b333a" stroke-width="2.4" stroke-linecap="round">' +
+      '<line x1="20" y1="3" x2="20" y2="10"/><line x1="20" y1="30" x2="20" y2="37"/>' +
+      '<line x1="3" y1="20" x2="10" y2="20"/><line x1="30" y1="20" x2="37" y2="20"/>' +
+      '<line x1="8" y1="8" x2="13" y2="13"/><line x1="32" y1="8" x2="27" y2="13"/>' +
+      '<line x1="8" y1="32" x2="13" y2="27"/><line x1="32" y1="32" x2="27" y2="27"/>' +
+      '</g>' +
+      '<circle cx="20" cy="20" r="10" fill="#5b6b78" stroke="#2b333a" stroke-width="2"/>' +
+      '<circle cx="20" cy="20" r="5" fill="#ffce54"/>' +
+      '</svg>';
+  }
+
+  // 초기 장비 지원상자: 나무 상자 + 모서리 금속 테두리
+  function woodBoxIconSvg(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<rect x="6" y="11" width="28" height="19" rx="1.5" fill="#8a5a30" stroke="#5c3a1c" stroke-width="1.4"/>' +
+      '<line x1="6" y1="20.5" x2="34" y2="20.5" stroke="#5c3a1c" stroke-width="1.3"/>' +
+      '<line x1="9" y1="11" x2="9" y2="30" stroke="rgba(0,0,0,.2)" stroke-width="1"/>' +
+      '<line x1="20" y1="11" x2="20" y2="30" stroke="rgba(0,0,0,.2)" stroke-width="1"/>' +
+      '<line x1="31" y1="11" x2="31" y2="30" stroke="rgba(0,0,0,.2)" stroke-width="1"/>' +
+      '<g stroke="#c7cdd3" stroke-width="2.6" fill="none" stroke-linecap="round">' +
+      '<path d="M6 11 L6 17 M6 11 L12 11"/>' +
+      '<path d="M34 11 L34 17 M34 11 L28 11"/>' +
+      '<path d="M6 30 L6 24 M6 30 L12 30"/>' +
+      '<path d="M34 30 L34 24 M34 30 L28 30"/>' +
+      '</g></svg>';
+  }
+
+  // 아이콘이 아직 없는 아이템을 위한 기본 아이콘(추후 새 아이템 추가 시 임시로 사용됨)
+  function genericItemIconSvg(){
+    return '<svg viewBox="0 0 40 40"><rect x="9" y="9" width="22" height="22" rx="4" ' +
+      'fill="#4a4468" stroke="#8f88b8" stroke-width="1.6"/></svg>';
+  }
+
+  function itemIconSvg(item){
+    if(!item) return '';
+    if(item.type === 'box') return woodBoxIconSvg();
+    switch(item.id){
+      case 'starter_hat': return clothIconSvg('hat', item.id, '#c9a876');
+      case 'starter_top': return clothIconSvg('top', item.id, '#b98d5f');
+      case 'starter_bottom': return clothIconSvg('bottom', item.id, '#8a6a45');
+      case 'starter_shoes': return clothIconSvg('shoes', item.id, '#6b4a2f');
+      case 'starter_weapon': return engineIconSvg();
+      default: return genericItemIconSvg();
+    }
+  }
+
+  // 스킬 아이콘: 전기 반응(번개), 야누스 익스텐션 MK1(확장 모듈)
+  function lightningSkillIconSvg(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<circle cx="20" cy="20" r="17" fill="#1b2a4a" stroke="#3f6fb0" stroke-width="1.5"/>' +
+      '<path d="M22 4 L11 22 H18 L16 36 L30 16 H22 Z" fill="#ffe066" stroke="#c99a1a" stroke-width="1.2"/>' +
+      '</svg>';
+  }
+  function extensionSkillIconSvg(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<circle cx="20" cy="20" r="17" fill="#22314a" stroke="#5b7ba8" stroke-width="1.5"/>' +
+      '<rect x="12" y="14" width="16" height="12" rx="2" fill="#7a93b8" stroke="#2b3a52" stroke-width="1.3"/>' +
+      '<line x1="16" y1="14" x2="16" y2="10" stroke="#7a93b8" stroke-width="2"/>' +
+      '<line x1="24" y1="14" x2="24" y2="10" stroke="#7a93b8" stroke-width="2"/>' +
+      '<line x1="16" y1="26" x2="16" y2="30" stroke="#7a93b8" stroke-width="2"/>' +
+      '<line x1="24" y1="26" x2="24" y2="30" stroke="#7a93b8" stroke-width="2"/>' +
+      '<circle cx="20" cy="20" r="3" fill="#ffce54"/>' +
+      '</svg>';
+  }
+  function skillIconSvg(skillId){
+    if(skillId === 'electric_reaction') return lightningSkillIconSvg();
+    if(skillId === 'janus_extension_mk1') return extensionSkillIconSvg();
+    return genericItemIconSvg();
+  }
+  // 레벨 미달로 잠긴 스킬 위에 덮는 자물쇠 오버레이
+  function lockOverlaySvg(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<path d="M15 18 V13 a5 5 0 0 1 10 0 V18" fill="none" stroke="#cfd4da" stroke-width="2.4"/>' +
+      '<rect x="12" y="18" width="16" height="14" rx="2" fill="#cfd4da" stroke="#565c66" stroke-width="1.3"/>' +
+      '<circle cx="20" cy="24" r="2" fill="#565c66"/>' +
+      '</svg>';
+  }
+
+  function makeEmptyEquipment(){
+    var eq = {};
+    EQUIP_SLOT_KEYS.forEach(function(key){ eq[key] = null; });
+    return eq;
+  }
+
+  function makeEmptyInventory(){
+    var inv = [];
+    for(var i = 0; i < INVENTORY_SIZE; i++) inv.push(null);
+    return inv;
+  }
+
+  // 경험치를 얻고, 테이블 기준으로 필요한 만큼 쌓이면 자동으로 레벨업(연속 레벨업 가능)
+  function gainExp(ch, amount){
+    ch.exp += amount;
+    var need = requiredExpForLevel(ch.level);
+    while(need !== null && ch.exp >= need){
+      ch.exp -= need;
+      ch.level += 1;
+      ch.statPoints += STAT_POINTS_PER_LEVEL;
+      ch.activeSkillPoints += SKILL_POINTS_PER_LEVEL;
+      ch.passiveSkillPoints += SKILL_POINTS_PER_LEVEL;
+      recalcDerivedStats(ch);
+      ch.hp = ch.maxHp; // 레벨업 시 체력 전부 회복
+      need = requiredExpForLevel(ch.level);
+    }
+  }
+
+  function freshCharacter(){
+    var ch = {
+      level:1, exp:0,
+      currentAreaId:'meadow1', // 마지막으로 있던 지역(재접속 시 이어서 시작하기 위함)
+      str:4, dex:4, luk:0,   // 초기 스탯
+      statPoints:0,          // 레벨업 시 5씩 지급, 스탯창에서 분배
+      activeSkillPoints:3,   // 레벨(1) x 3. 이후 레벨업마다 3씩 추가 지급
+      passiveSkillPoints:3,  // 레벨(1) x 3. 이후 레벨업마다 3씩 추가 지급
+      skills:{},             // skillId -> 레벨(투자 안 하면 없음/0)
+      hotbar: makeEmptyHotbar(), // 6칸 단축키(Z X C A S D)에 장착된 액티브 스킬 id
+      hp:0, maxHp:0, atk:0, def:0, regen:0, accuracy:0,
+      critChance:0, critDamage:0,
+      proficiency: BASE_STATS.baseProficiency, // 숙련도(%) - 공격력 대비 최소 데미지 비율
+      gold:0,
+      bossFirstKills:{}, // bossId -> true(계정당 1회 최초 처치 보상을 이미 받았는지)
+      equipment: makeEmptyEquipment(),
+      inventory: makeEmptyInventory()
+    };
+    // 첫 인벤토리 칸에 초기 장비 지원상자 지급
+    ch.inventory[0] = { id:'starter_box', name:'초기 장비 지원상자', type:'box', kind:'starter_box' };
+    recalcDerivedStats(ch);
+    ch.hp = ch.maxHp;
+    return ch;
+  }
+
+  // 스탯/레벨/인벤토리/스킬 시스템이 추가되기 전에 저장된 예전 캐릭터 데이터를 새 구조로 보정
+  function normalizeCharacter(ch){
+    if(typeof ch.level !== 'number') ch.level = 1;
+    if(typeof ch.currentAreaId !== 'string') ch.currentAreaId = 'meadow1';
+    if(typeof ch.exp !== 'number') ch.exp = 0;
+    if(typeof ch.str !== 'number') ch.str = 4;
+    if(typeof ch.dex !== 'number') ch.dex = 4;
+    if(typeof ch.luk !== 'number') ch.luk = 0;
+    if(typeof ch.statPoints !== 'number') ch.statPoints = 0;
+    if(typeof ch.activeSkillPoints !== 'number') ch.activeSkillPoints = 0;
+    if(typeof ch.passiveSkillPoints !== 'number') ch.passiveSkillPoints = 0;
+    if(!ch.skills) ch.skills = {};
+    if(!ch.hotbar || !Array.isArray(ch.hotbar)) ch.hotbar = makeEmptyHotbar();
+    if(typeof ch.proficiency !== 'number') ch.proficiency = BASE_STATS.baseProficiency;
+    // 스킬 시스템이 중간에 추가돼서 그 전까지 레벨업으로 못 받은 스킬 포인트를 보정.
+    // 이미 투자(스킬 레벨)한 만큼은 빼고, 레벨 x 3에 못 미치면 부족분만 채워줌(이미 충분하면 그대로 둠).
+    reconcileSkillPoints(ch);
+    if(typeof ch.gold !== 'number') ch.gold = 0;
+    if(!ch.bossFirstKills) ch.bossFirstKills = {};
+    if(!ch.equipment) ch.equipment = makeEmptyEquipment();
+    if(!ch.inventory){
+      ch.inventory = makeEmptyInventory();
+      // 인벤토리 시스템이 없던 계정에도 초기 장비 지원상자를 지급
+      ch.inventory[0] = { id:'starter_box', name:'초기 장비 지원상자', type:'box', kind:'starter_box' };
+    }
+    var hadHp = typeof ch.hp === 'number';
+    var prevHp = ch.hp;
+    recalcDerivedStats(ch);
+    ch.hp = hadHp ? Math.min(prevHp, ch.maxHp) : ch.maxHp;
+  }
+
+  // ---------------- 회원가입 ----------------
+  document.getElementById('signup-submit').onclick = async function(){
+    var btn = this;
+    var name = document.getElementById('signup-name').value.trim();
+    var birth = document.getElementById('signup-birth').value;
+    var id = document.getElementById('signup-id').value.trim();
+    var pw = document.getElementById('signup-pw').value;
+    var pw2 = document.getElementById('signup-pw2').value;
+    var errEl = document.getElementById('signup-error');
+
+    if(!name || !birth || !id || !pw || !pw2){
+      errEl.textContent = '모든 항목을 입력해주세요.';
+      errEl.hidden = false;
+      return;
+    }
+    if(pw !== pw2){
+      errEl.textContent = '비밀번호가 서로 일치하지 않습니다.';
+      errEl.hidden = false;
+      return;
+    }
+
+    btn.disabled = true;
+    try{
+      var existing = await getAccount(id);
+      if(existing){
+        errEl.textContent = '이미 사용 중인 아이디입니다.';
+        errEl.hidden = false;
+        return;
+      }
+      errEl.hidden = true;
+      var account = { id:id, pw:pw, name:name, birth:birth, createdAt:Date.now() };
+      await saveAccount(account);
+      var character = freshCharacter();
+      await saveCharacter(id, character);
+      if(usingFallback){
+        console.warn('window.storage를 사용할 수 없어 이번 세션 메모리에만 저장했습니다. 새로고침하면 사라집니다.');
+      }
+      enterGame(account, character);
+    }catch(e){
+      errEl.textContent = '회원가입 처리 중 오류가 발생했습니다: ' + e.message;
+      errEl.hidden = false;
+      console.error('signup error', e);
+    }finally{
+      btn.disabled = false;
+    }
+  };
+
+  // ---------------- 로그인 ----------------
+  document.getElementById('login-submit').onclick = async function(){
+    var id = document.getElementById('login-id').value.trim();
+    var pw = document.getElementById('login-pw').value;
+    var errEl = document.getElementById('login-error');
+
+    var account = await getAccount(id);
+    if(!account){
+      errEl.textContent = '존재하지 않는 아이디입니다.';
+      errEl.hidden = false;
+      return;
+    }
+    if(account.pw !== pw){
+      errEl.textContent = '비밀번호가 일치하지 않습니다.';
+      errEl.hidden = false;
+      return;
+    }
+    errEl.hidden = true;
+    var character = await getCharacter(id);
+    if(!character) character = freshCharacter();
+    else normalizeCharacter(character);
+    enterGame(account, character);
+  };
+
+  // ---------------- 게임 상태 ----------------
+  var state = {
+    account:null,
+    character:null,
+    currentAreaId:'meadow1', // 현재 위치한 지역(사냥터)
+    monsters:{},      // slotId -> {hp,maxHp,atk,...} or null
+    inRangeSlots:[],   // 플레이어 공격 범위 안에 있는 슬롯 id 목록(위치 고정, 접속 시 1회 계산)
+    skillCooldowns:{},  // skillId -> 마지막 시전 시각(ms). 세션 동안만 유지, 저장 안 함
+    skillBusyUntil:{},  // skillId -> 시전+후딜레이가 끝나는 시각(ms). 이 시각 전엔 재시전 불가
+    portalLockUntil:0,  // 이 시각 전에는 포탈 판정을 하지 않음(지역 진입 직후 즉시 튕김 방지)
+    entryDirection:'forward' // 'forward'(다음 지역 포탈로 진입) | 'backward'(이전 지역 포탈로 진입) - 스폰 위치 결정에 사용
+  };
+
+  function enterGame(account, character){
+    state.account = account;
+    state.character = character;
+    // 저장된 위치(지역)가 있으면 그 지역에서 이어서 시작, 없으면 시작의 초원부터
+    state.currentAreaId = (character.currentAreaId && AREAS[character.currentAreaId]) ? character.currentAreaId : 'meadow1';
+    state.entryDirection = 'forward'; // 접속 시에는 항상 기본(맨 아래) 스폰 위치로 시작
+    state.skillCooldowns = {}; // 쿨타임은 세션 동안만 유지(저장하지 않음)
+    state.skillBusyUntil = {}; // 시전/후딜레이 상태도 세션 동안만 유지
+    renderStats();
+    showScreen('screen-game');
+    buildWorld();
+    renderHotbar();
+    startRespawnLoop();
+    startRegenLoop();
+    startMovementLoop();
+    startMonsterMovementLoop();
+    startMonsterSkillLoop();
+    startHotbarCooldownLoop();
+    setInterval(autoAttackTick, 2000);
+    setInterval(monsterAttackTick, MONSTER_ATTACK_INTERVAL_MS);
+  }
+
+  // ---------------- 이동: 화살표 키(PC) 또는 가상 조이스틱(모바일)으로 야누스 이동 ----------------
+  var keysPressed = { ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false };
+  var joystickVector = { x:0, y:0 }; // -1~1 범위로 정규화된 방향(조이스틱을 안 쓰면 항상 0)
+  var movementLoopStarted = false;
+
+  document.addEventListener('keydown', function(e){
+    if(Object.prototype.hasOwnProperty.call(keysPressed, e.key)){
+      keysPressed[e.key] = true;
+      // 화살표 키로 페이지 스크롤되는 것 방지
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('keyup', function(e){
+    if(Object.prototype.hasOwnProperty.call(keysPressed, e.key)){
+      keysPressed[e.key] = false;
+    }
+  });
+
+  // 가상 조이스틱: 포인터 이벤트로 마우스/터치를 함께 처리(브라우저 테스트에서도 그대로 동작)
+  (function setupJoystick(){
+    var zone = document.getElementById('joystick-zone');
+    var knob = document.getElementById('joystick-knob');
+    if(!zone || !knob) return;
+    var activePointerId = null;
+    var centerX = 0, centerY = 0;
+    var MAX_KNOB_RADIUS_PX = 34;
+    var DEAD_ZONE_PX = 6;
+
+    function setKnobOffset(dx, dy){
+      knob.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px))';
+    }
+    function resetJoystick(){
+      setKnobOffset(0, 0);
+      joystickVector.x = 0;
+      joystickVector.y = 0;
+      zone.classList.remove('active');
+    }
+    function updateFromPoint(clientX, clientY){
+      var dx = clientX - centerX;
+      var dy = clientY - centerY;
+      var dist = Math.hypot(dx, dy);
+      var clampedDist = Math.min(dist, MAX_KNOB_RADIUS_PX);
+      var angle = Math.atan2(dy, dx);
+      var kx = Math.cos(angle) * clampedDist;
+      var ky = Math.sin(angle) * clampedDist;
+      setKnobOffset(kx, ky);
+      if(dist < DEAD_ZONE_PX){
+        joystickVector.x = 0;
+        joystickVector.y = 0;
+      }else{
+        joystickVector.x = kx / MAX_KNOB_RADIUS_PX;
+        joystickVector.y = ky / MAX_KNOB_RADIUS_PX;
+      }
+    }
+
+    zone.addEventListener('pointerdown', function(e){
+      if(activePointerId !== null) return;
+      activePointerId = e.pointerId;
+      zone.classList.add('active');
+      var rect = zone.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+      if(zone.setPointerCapture) zone.setPointerCapture(activePointerId);
+      updateFromPoint(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+    zone.addEventListener('pointermove', function(e){
+      if(e.pointerId !== activePointerId) return;
+      updateFromPoint(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+    function endPointer(e){
+      if(e.pointerId !== activePointerId) return;
+      activePointerId = null;
+      resetJoystick();
+    }
+    zone.addEventListener('pointerup', endPointer);
+    zone.addEventListener('pointercancel', endPointer);
+  })();
+
+  function startMovementLoop(){
+    if(movementLoopStarted) return; // enterGame이 여러 번 호출돼도 루프는 하나만
+    movementLoopStarted = true;
+    setInterval(function(){
+      if(!document.getElementById('screen-game').classList.contains('active')) return;
+      if(isPlayerStunned()) return; // 기절 중에는 이동 불가
+      var dx = 0, dy = 0;
+      if(keysPressed.ArrowUp) dy -= MOVE_STEP_PX;
+      if(keysPressed.ArrowDown) dy += MOVE_STEP_PX;
+      if(keysPressed.ArrowLeft) dx -= MOVE_STEP_PX;
+      if(keysPressed.ArrowRight) dx += MOVE_STEP_PX;
+      if(joystickVector.x !== 0 || joystickVector.y !== 0){
+        dx += joystickVector.x * MOVE_STEP_PX;
+        dy += joystickVector.y * MOVE_STEP_PX;
+      }
+      if(dx === 0 && dy === 0) return;
+      movePlayer(dx, dy);
+    }, MOVE_INTERVAL_MS);
+  }
+
+  function movePlayer(dx, dy){
+    var stage = document.getElementById('harbor-stage');
+    var player = document.getElementById('player-avatar');
+    if(!stage || !player) return;
+    var stageRect = stage.getBoundingClientRect();
+    var pRect = player.getBoundingClientRect();
+    var curLeft = pRect.left - stageRect.left + pRect.width / 2;
+    var curTop = pRect.top - stageRect.top + pRect.height / 2;
+    var newLeft = Math.max(MOVE_MARGIN_PX, Math.min(stageRect.width - MOVE_MARGIN_PX, curLeft + dx));
+    var newTop = Math.max(MOVE_MARGIN_PX, Math.min(stageRect.height - MOVE_MARGIN_PX, curTop + dy));
+    player.style.left = newLeft + 'px';
+    player.style.top = newTop + 'px';
+    // 위치가 바뀔 때마다 공격 범위 안 몬스터 목록을 다시 계산
+    computeInRangeSlots();
+    // 포탈에 닿았는지도 매 이동마다 확인
+    checkPortalCollision();
+  }
+
+  // ---------------- 지역/필드 정의 ----------------
+  // 지역마다 이름과 등장 몬스터 종류(monsterKey), 다음 지역(nextAreaId)을 가짐.
+  // nextAreaId가 있으면 맵 위쪽 중앙에 포탈이 생기고, 포탈에 닿으면 해당 지역으로 자동 이동.
+  var AREAS = {
+    meadow1: { id:'meadow1', name:'시작의 초원', monsterKey:'snail', nextAreaId:'meadow2' },
+    meadow2: { id:'meadow2', name:'시작의 초원 2', monsterKey:'blue_snail', nextAreaId:'meadow3' },
+    meadow3: { id:'meadow3', name:'시작의 초원 3', monsterKey:'red_snail', nextAreaId:'meadow4' },
+    meadow4: { id:'meadow4', name:'시작의 초원 4', monsterKey:'popuni', nextAreaId:'meadow5' },
+    meadow5: { id:'meadow5', name:'시작의 초원 5', monsterKey:'popurina', nextAreaId:'meadow6' },
+    meadow6: { id:'meadow6', name:'시작의 초원 6', monsterKey:'fierce_popuni', nextAreaId:'meadow7' },
+    meadow7: { id:'meadow7', name:'시작의 초원 7', monsterKey:'goblin_lowly', nextAreaId:'meadow8' },
+    meadow8: { id:'meadow8', name:'시작의 초원 8', monsterKey:'goblin_guard', nextAreaId:'meadow9' },
+    meadow9: { id:'meadow9', name:'시작의 초원 9', monsterKey:'goblin_archer', nextAreaId:'meadow10' },
+    meadow10: { id:'meadow10', name:'시작의 초원 10', monsterKey:'ogre_goblin', nextAreaId:null, isBossArea:true, monsterCount:1 }
+  };
+
+  // ---------------- 필드: 시작의 초원(탑뷰) ----------------
+  // 발판/층 구분 없이 넓은 초원 위에 40마리를 무작위로 흩어서 배치.
+  // 플레이어 시작 지점 반경 180px 안에는 스폰되지 않게 함.
+  var MONSTER_COUNT = 40;
+  var SPAWN_EDGE_MARGIN_PX = 30;            // 스테이지 가장자리에서 몬스터가 벗어나지 않게 두는 여백
+  var SPAWN_KEEPOUT_FROM_PLAYER_PX = 180;   // 플레이어 시작 위치 기준 스폰 금지 반경
+  var SPAWN_MIN_GAP_PX = 46;                // 몬스터끼리(+포탈) 너무 겹치지 않게 두는 최소 간격
+  var SPAWN_MAX_ATTEMPTS = 300;             // 위 조건들을 만족하는 자리를 찾기 위한 최대 시도 횟수
+
+  var RESPAWN_MS = 7500; // 모든 사냥터(지역) 공통 리스폰 주기
+
+  // 초기 스폰 위치: 초원 맨 아래쪽 중앙 (이후 화살표 키로 이동) - 모든 지역 공통
+  var PLAYER_POS = { top:'92%', left:'50%' };
+  // 공격 범위(반지름, px). 나중에 범위 강화 시 이 값과 함께 야누스 아바타 크기도 키울 예정.
+  var ATTACK_RADIUS_PX = 100;
+  // 기본 공격이 한 번에 맞힐 수 있는 최대 마릿수(패시브 스킬 등으로 늘어날 수 있음)
+  var BASE_MAX_TARGETS = 4;
+  var MOVE_STEP_PX = 6;        // 이동 루프 1틱당 이동 거리
+  var MOVE_INTERVAL_MS = 30;   // 이동 루프 주기
+  var MOVE_MARGIN_PX = 18;     // 스테이지 가장자리 여백(밖으로 못 나가게)
+
+  // 포탈: 맵 최상단 중앙에 배치, 플레이어가 이 반경 안에 들어오면 다음 지역으로 이동
+  var PORTAL_TOP_MARGIN_PX = 46;
+  var PORTAL_TRIGGER_RADIUS_PX = 34;
+  // 유저 스폰 위치를 "이전 지역" 포탈(맵 맨 아래 기준점)보다 이만큼 위(안쪽)로 옮겨서,
+  // 스폰 직후 포탈을 등지게 만드는 오프셋
+  var PREV_PORTAL_OFFSET_PX = 110;
+
+  function snailSVG(){
+    return '<svg viewBox="0 0 40 40"><ellipse cx="16" cy="27" rx="13" ry="7" fill="#6fae52"/>' +
+      '<circle cx="24" cy="16" r="10" fill="#b5732e"/><circle cx="24" cy="16" r="6" fill="#8a4f1e"/>' +
+      '<circle cx="24" cy="16" r="2.4" fill="#5f3413"/>' +
+      '<line x1="8" y1="20" x2="4" y2="14" stroke="#6fae52" stroke-width="2"/>' +
+      '<circle cx="4" cy="14" r="1.6" fill="#233"/></svg>';
+  }
+
+  // 시작의 초원 2에 등장하는 파란 달팽이(같은 몸체, 등껍질만 파란 계열로 색상 변경)
+  function blueSnailSVG(){
+    return '<svg viewBox="0 0 40 40"><ellipse cx="16" cy="27" rx="13" ry="7" fill="#6fae52"/>' +
+      '<circle cx="24" cy="16" r="10" fill="#3a6fb5"/><circle cx="24" cy="16" r="6" fill="#2a4f8a"/>' +
+      '<circle cx="24" cy="16" r="2.4" fill="#1a2f5f"/>' +
+      '<line x1="8" y1="20" x2="4" y2="14" stroke="#6fae52" stroke-width="2"/>' +
+      '<circle cx="4" cy="14" r="1.6" fill="#233"/></svg>';
+  }
+
+  // 시작의 초원 3: 빨간 달팽이(잘 먹은 컨셉 - 몸통이 살짝 더 통통함, 실제 크기는 sizeScale로 조정)
+  function redSnailSVG(){
+    return '<svg viewBox="0 0 40 40"><ellipse cx="16" cy="27" rx="14" ry="8" fill="#6fae52"/>' +
+      '<circle cx="24" cy="16" r="10" fill="#c0392b"/><circle cx="24" cy="16" r="6" fill="#8a241a"/>' +
+      '<circle cx="24" cy="16" r="2.4" fill="#5b1611"/>' +
+      '<line x1="8" y1="20" x2="4" y2="14" stroke="#6fae52" stroke-width="2"/>' +
+      '<circle cx="4" cy="14" r="1.6" fill="#233"/></svg>';
+  }
+
+  // 시작의 초원 4: 포푸니(어린 토끼, 흰 털, 작은 당근을 든 모습)
+  function popuniSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<ellipse cx="14.5" cy="9" rx="3" ry="8.5" fill="#f7f7f5" stroke="#c9c9c9" stroke-width="1" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="16.5" cy="8.2" rx="1.4" ry="6" fill="#f2c7d6" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="25.5" cy="9" rx="3" ry="8.5" fill="#f7f7f5" stroke="#c9c9c9" stroke-width="1" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="23.5" cy="8.2" rx="1.4" ry="6" fill="#f2c7d6" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="20" cy="27" rx="11" ry="9" fill="#fbfbfa" stroke="#c9c9c9" stroke-width="1.2"/>' +
+      '<circle cx="20" cy="18" r="8" fill="#fbfbfa" stroke="#c9c9c9" stroke-width="1.2"/>' +
+      '<circle cx="17.2" cy="17" r="1.3" fill="#2b2b2b"/>' +
+      '<circle cx="22.8" cy="17" r="1.3" fill="#2b2b2b"/>' +
+      '<circle cx="20" cy="19.8" r="1.1" fill="#ef9db8"/>' +
+      '<g transform="translate(27,26) rotate(25)">' +
+      '<path d="M0 -2 L7 0 L0 2 Z" fill="#e8842c" stroke="#a85c1b" stroke-width="0.6"/>' +
+      '<line x1="0" y1="-2" x2="-1.8" y2="-3.6" stroke="#4caf50" stroke-width="1.2"/>' +
+      '<line x1="0" y1="2" x2="-2.2" y2="1.2" stroke="#4caf50" stroke-width="1.2"/>' +
+      '</g></svg>';
+  }
+
+  // 시작의 초원 5: 포푸리나(포푸니와 같은 체형, 갈색 털 + 배쪽 반원 흰털)
+  function popurinaSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<ellipse cx="14.5" cy="9" rx="3" ry="8.5" fill="#a9764a" stroke="#7a5334" stroke-width="1" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="16.5" cy="8.2" rx="1.4" ry="6" fill="#f2c7d6" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="25.5" cy="9" rx="3" ry="8.5" fill="#a9764a" stroke="#7a5334" stroke-width="1" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="23.5" cy="8.2" rx="1.4" ry="6" fill="#f2c7d6" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="20" cy="27" rx="11" ry="9" fill="#a9764a" stroke="#7a5334" stroke-width="1.2"/>' +
+      '<path d="M9.3 26.5 A10.7 6.2 0 0 0 30.7 26.5 Z" fill="#f7f2ea"/>' +
+      '<circle cx="20" cy="18" r="8" fill="#a9764a" stroke="#7a5334" stroke-width="1.2"/>' +
+      '<circle cx="17.2" cy="17" r="1.3" fill="#2b2b2b"/>' +
+      '<circle cx="22.8" cy="17" r="1.3" fill="#2b2b2b"/>' +
+      '<circle cx="20" cy="19.8" r="1.1" fill="#ef9db8"/>' +
+      '<g transform="translate(27,26) rotate(25)">' +
+      '<path d="M0 -2 L7 0 L0 2 Z" fill="#e8842c" stroke="#a85c1b" stroke-width="0.6"/>' +
+      '<line x1="0" y1="-2" x2="-1.8" y2="-3.6" stroke="#4caf50" stroke-width="1.2"/>' +
+      '<line x1="0" y1="2" x2="-2.2" y2="1.2" stroke="#4caf50" stroke-width="1.2"/>' +
+      '</g></svg>';
+  }
+
+  // 시작의 초원 6: 사나운 포푸니(흑화 컨셉, 검은 털 + 배쪽 흰털 + 사나운 표정, 당근 던지기 스킬 보유)
+  function fiercePopuniSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<ellipse cx="14.5" cy="9" rx="3" ry="8.5" fill="#2b2b2e" stroke="#111" stroke-width="1" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="16.5" cy="8.2" rx="1.4" ry="6" fill="#7a2b3a" transform="rotate(-16 14.5 9)"/>' +
+      '<ellipse cx="25.5" cy="9" rx="3" ry="8.5" fill="#2b2b2e" stroke="#111" stroke-width="1" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="23.5" cy="8.2" rx="1.4" ry="6" fill="#7a2b3a" transform="rotate(16 25.5 9)"/>' +
+      '<ellipse cx="20" cy="27" rx="11" ry="9" fill="#2b2b2e" stroke="#111" stroke-width="1.2"/>' +
+      '<path d="M9.3 26.5 A10.7 6.2 0 0 0 30.7 26.5 Z" fill="#f2f2f0"/>' +
+      '<circle cx="20" cy="18" r="8" fill="#2b2b2e" stroke="#111" stroke-width="1.2"/>' +
+      '<line x1="15.2" y1="14.5" x2="18.4" y2="15.6" stroke="#f2f2f0" stroke-width="1.1"/>' +
+      '<line x1="24.8" y1="14.5" x2="21.6" y2="15.6" stroke="#f2f2f0" stroke-width="1.1"/>' +
+      '<circle cx="17.2" cy="17" r="1.3" fill="#ff5a4d"/>' +
+      '<circle cx="22.8" cy="17" r="1.3" fill="#ff5a4d"/>' +
+      '<circle cx="20" cy="19.8" r="1.1" fill="#7a2b3a"/>' +
+      '<g transform="translate(27,26) rotate(25)">' +
+      '<path d="M0 -2 L7 0 L0 2 Z" fill="#e8842c" stroke="#a85c1b" stroke-width="0.6"/>' +
+      '<line x1="0" y1="-2" x2="-1.8" y2="-3.6" stroke="#4caf50" stroke-width="1.2"/>' +
+      '<line x1="0" y1="2" x2="-2.2" y2="1.2" stroke="#4caf50" stroke-width="1.2"/>' +
+      '</g></svg>';
+  }
+
+  // 시작의 초원 7: 하층민 고블린(허접한 고블린 + 낡은 원주민 복장 + 낡은 나무 방망이)
+  function lowlyGoblinSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<path d="M8 14 L2 9 L9 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<path d="M32 14 L38 9 L31 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<ellipse cx="20" cy="27" rx="10.5" ry="9" fill="#8a7355" stroke="#5c4a35" stroke-width="1.2"/>' +
+      '<path d="M10 33 L13 30 L16 33 L19 30 L22 33 L25 30 L28 33 L30 30" fill="none" stroke="#5c4a35" stroke-width="1"/>' +
+      '<circle cx="20" cy="17" r="8" fill="#7d9c4f" stroke="#4f6530" stroke-width="1.2"/>' +
+      '<circle cx="17.3" cy="16.5" r="1.3" fill="#f4e04d"/><circle cx="17.3" cy="16.5" r=".6" fill="#2b2b2b"/>' +
+      '<circle cx="22.7" cy="16.5" r="1.3" fill="#f4e04d"/><circle cx="22.7" cy="16.5" r=".6" fill="#2b2b2b"/>' +
+      '<path d="M17.5 20.5 Q20 22.5 22.5 20.5" stroke="#3d4f26" stroke-width="1" fill="none"/>' +
+      '<g transform="translate(29,26) rotate(20)">' +
+      '<rect x="-1.5" y="-9" width="3" height="9" rx="1.2" fill="#8a6a45" stroke="#5c4326" stroke-width="0.8"/>' +
+      '<ellipse cx="0" cy="-10" rx="3" ry="3.6" fill="#a0805a" stroke="#5c4326" stroke-width="0.8"/>' +
+      '</g></svg>';
+  }
+
+  // 시작의 초원 8: 경비원 고블린(나무+금속 투구, 금속 장식 복장, 금속 징 박힌 방망이)
+  function guardGoblinSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<path d="M8 14 L2 9 L9 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<path d="M32 14 L38 9 L31 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<ellipse cx="20" cy="27" rx="10.5" ry="9" fill="#6f6350" stroke="#463c2e" stroke-width="1.2"/>' +
+      '<circle cx="15" cy="26" r="1" fill="#c7cdd3"/><circle cx="25" cy="26" r="1" fill="#c7cdd3"/><circle cx="20" cy="31" r="1" fill="#c7cdd3"/>' +
+      '<circle cx="20" cy="17" r="8" fill="#7d9c4f" stroke="#4f6530" stroke-width="1.2"/>' +
+      '<path d="M12.5 13 A7.5 6 0 0 1 27.5 13 Z" fill="#8a6a45" stroke="#5c4326" stroke-width="1"/>' +
+      '<rect x="12" y="12" width="16" height="2.6" rx="1.3" fill="#9aa4ad" stroke="#5c636b" stroke-width="0.8"/>' +
+      '<circle cx="17.3" cy="17" r="1.3" fill="#f4e04d"/><circle cx="17.3" cy="17" r=".6" fill="#2b2b2b"/>' +
+      '<circle cx="22.7" cy="17" r="1.3" fill="#f4e04d"/><circle cx="22.7" cy="17" r=".6" fill="#2b2b2b"/>' +
+      '<path d="M17.5 21 Q20 23 22.5 21" stroke="#3d4f26" stroke-width="1" fill="none"/>' +
+      '<g transform="translate(29,26) rotate(20)">' +
+      '<rect x="-1.5" y="-9" width="3" height="9" rx="1.2" fill="#7a5c3a" stroke="#4a3620" stroke-width="0.8"/>' +
+      '<ellipse cx="0" cy="-10" rx="3" ry="3.6" fill="#8a6a45" stroke="#4a3620" stroke-width="0.8"/>' +
+      '<circle cx="0" cy="-11.5" r=".7" fill="#c7cdd3"/><circle cx="-1.4" cy="-9" r=".6" fill="#c7cdd3"/><circle cx="1.4" cy="-9" r=".6" fill="#c7cdd3"/>' +
+      '</g></svg>';
+  }
+
+  // 시작의 초원 9: 아처 고블린(활 + 화살통, 원주민풍 궁수 복장)
+  function archerGoblinSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<path d="M8 14 L2 9 L9 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<path d="M32 14 L38 9 L31 12 Z" fill="#7d9c4f" stroke="#4f6530" stroke-width="1"/>' +
+      '<g transform="translate(27,14) rotate(12)">' +
+      '<rect x="-2.2" y="0" width="4.4" height="14" rx="1.5" fill="#8a6a45" stroke="#5c4326" stroke-width="0.8"/>' +
+      '<line x1="-1" y1="0" x2="-2.5" y2="-8" stroke="#c9a876" stroke-width="1"/>' +
+      '<line x1="0" y1="0" x2="0" y2="-9" stroke="#c9a876" stroke-width="1"/>' +
+      '<line x1="1" y1="0" x2="2.5" y2="-8" stroke="#c9a876" stroke-width="1"/>' +
+      '</g>' +
+      '<ellipse cx="20" cy="27" rx="10.5" ry="9" fill="#5c7048" stroke="#3a4a2e" stroke-width="1.2"/>' +
+      '<path d="M10 33 L13 30 L16 33 L19 30 L22 33 L25 30 L28 33 L30 30" fill="none" stroke="#3a4a2e" stroke-width="1"/>' +
+      '<circle cx="20" cy="17" r="8" fill="#7d9c4f" stroke="#4f6530" stroke-width="1.2"/>' +
+      '<circle cx="17.3" cy="16.5" r="1.3" fill="#f4e04d"/><circle cx="17.3" cy="16.5" r=".6" fill="#2b2b2b"/>' +
+      '<circle cx="22.7" cy="16.5" r="1.3" fill="#f4e04d"/><circle cx="22.7" cy="16.5" r=".6" fill="#2b2b2b"/>' +
+      '<path d="M17.5 20.5 Q20 22.5 22.5 20.5" stroke="#3d4f26" stroke-width="1" fill="none"/>' +
+      '<g transform="translate(10,27)">' +
+      '<path d="M0 -9 Q-5 0 0 9" fill="none" stroke="#8a6a45" stroke-width="1.6"/>' +
+      '<line x1="0" y1="-9" x2="0" y2="9" stroke="#e8dcc0" stroke-width="0.7"/>' +
+      '</g>' +
+      '</svg>';
+  }
+
+  // 시작의 초원 10(보스): 오우거 고블린 - 고블린 머리 + 검투사풍 철갑 투구/복장 + 모닝스타
+  function ogreGoblinSVG(){
+    return '<svg viewBox="0 0 40 40">' +
+      '<path d="M7 14 L1 8 L9 11 Z" fill="#6a8a48" stroke="#3d5026" stroke-width="1.2"/>' +
+      '<path d="M33 14 L39 8 L31 11 Z" fill="#6a8a48" stroke="#3d5026" stroke-width="1.2"/>' +
+      '<ellipse cx="20" cy="27" rx="12.5" ry="10.5" fill="#5a5148" stroke="#2e2a24" stroke-width="1.4"/>' +
+      '<circle cx="14" cy="24" r="1.3" fill="#c7cdd3"/><circle cx="26" cy="24" r="1.3" fill="#c7cdd3"/>' +
+      '<circle cx="20" cy="32" r="1.3" fill="#c7cdd3"/><circle cx="14" cy="32" r="1.1" fill="#c7cdd3"/><circle cx="26" cy="32" r="1.1" fill="#c7cdd3"/>' +
+      '<circle cx="20" cy="17" r="9" fill="#6a8a48" stroke="#3d5026" stroke-width="1.4"/>' +
+      '<path d="M9 12 A11 8 0 0 1 31 12 Z" fill="#7a7a7a" stroke="#3a3a3a" stroke-width="1.3"/>' +
+      '<path d="M9 12 A11 8 0 0 1 31 12" fill="none" stroke="#9aa4ad" stroke-width="1.6"/>' +
+      '<rect x="18.6" y="6" width="2.8" height="8" fill="#5a5a5a" stroke="#2a2a2a" stroke-width="0.6"/>' +
+      '<circle cx="16.5" cy="17.5" r="1.5" fill="#ff5a4d"/>' +
+      '<circle cx="23.5" cy="17.5" r="1.5" fill="#ff5a4d"/>' +
+      '<path d="M15.5 22 Q20 20 24.5 22" stroke="#2e2a24" stroke-width="1.3" fill="none"/>' +
+      '<path d="M13 22.5 L11 25 M27 22.5 L29 25" stroke="#4a3f2f" stroke-width="1.4"/>' +
+      '<g transform="translate(31,27) rotate(20)">' +
+      '<rect x="-1.8" y="-2" width="3.6" height="13" rx="1.4" fill="#6b6b6b" stroke="#333" stroke-width="0.8"/>' +
+      '<circle cx="0" cy="-6" r="4.4" fill="#8a8a8a" stroke="#333" stroke-width="1"/>' +
+      '<circle cx="0" cy="-9.5" r="1" fill="#c7cdd3"/><circle cx="3" cy="-6" r="1" fill="#c7cdd3"/>' +
+      '<circle cx="0" cy="-2.5" r="1" fill="#c7cdd3"/><circle cx="-3" cy="-6" r="1" fill="#c7cdd3"/>' +
+      '</g></svg>';
+  }
+
+  function svgForKind(kind){
+    if(kind === 'blue_snail') return blueSnailSVG();
+    if(kind === 'red_snail') return redSnailSVG();
+    if(kind === 'popurina') return popurinaSVG();
+    if(kind === 'fierce_popuni') return fiercePopuniSVG();
+    if(kind === 'popuni') return popuniSVG();
+    if(kind === 'goblin_lowly') return lowlyGoblinSVG();
+    if(kind === 'goblin_guard') return guardGoblinSVG();
+    if(kind === 'goblin_archer') return archerGoblinSVG();
+    if(kind === 'ogre_goblin') return ogreGoblinSVG();
+    return snailSVG();
+  }
+
+  // 몬스터 종류별 기본 스탯/드랍 테이블. goldTable은 [드랍량, 확률(%)] 목록(합 100).
+  // spd(이동속도) 기본 규칙: 별도 언급이 없는 새 몬스터는 3.5로 설정. 단, 이미 정해진 기존 몬스터의 spd는 그대로 유지(변경 금지).
+  var MONSTER_TEMPLATES = {
+    snail: {
+      svgKind:'snail', hp:50, atk:5, spd:2, range:10, expDrop:2, level:1,
+      sizeScale:1, animClass:'anim-crawl',
+      goldTable: [[1,92],[2,8]]
+    },
+    blue_snail: {
+      svgKind:'blue_snail', hp:105, atk:9, spd:2, range:25, expDrop:5, level:3,
+      sizeScale:1, animClass:'anim-crawl',
+      goldTable: [[2,85],[3,15]]
+    },
+    red_snail: {
+      svgKind:'red_snail', hp:170, atk:14, spd:2, range:25, expDrop:7, level:4,
+      sizeScale:1.12, animClass:'anim-crawl', // 다른 달팽이보다 10~15% 정도 살짝 큼(잘 먹은 컨셉)
+      goldRange:[2,5] // 난수 로직으로 2~5 사이에서 지급
+    },
+    popuni: {
+      svgKind:'popuni', hp:285, atk:19, spd:2, range:35, expDrop:12, level:6,
+      sizeScale:1.12, animClass:'anim-walk', // 크기는 빨간 달팽이와 동일
+      goldRange:[2,8] // 난수 로직으로 2~8 사이에서 지급
+    },
+    popurina: {
+      svgKind:'popurina', hp:400, atk:23, spd:5, range:35, expDrop:17, level:7,
+      sizeScale:1.12, animClass:'anim-walk', // 포푸니와 동일 크기
+      goldRange:[4,9] // 난수 로직으로 4~9 사이에서 지급
+    },
+    fierce_popuni: {
+      svgKind:'fierce_popuni', hp:595, atk:26, spd:2, range:35, expDrop:23, level:9,
+      sizeScale:1.12, animClass:'anim-walk', // 포푸니 계열과 동일 크기
+      goldRange:[6,12], // 난수 로직으로 6~12 사이에서 지급
+      // 당근 던지기: 사거리(원형) 접촉 공격과 별개로, 가로 125 x 세로 30 범위에 유저가 들어오면
+      // 4.5초 쿨타임마다 유저 위치를 향해 당근을 던져 공격력의 40%로 공격
+      skills: [ { id:'carrot_throw', name:'당근 던지기', cooldownMs:4500, percent:40, hitboxW:125, hitboxH:30 } ]
+    },
+    goblin_lowly: {
+      svgKind:'goblin_lowly', hp:750, atk:34, spd:3.5, range:35, expDrop:26, level:10,
+      sizeScale:1, animClass:'anim-walk',
+      goldRange:[6,14] // 난수 로직으로 6~14 사이에서 지급
+    },
+    goblin_guard: {
+      svgKind:'goblin_guard', hp:990, atk:55, spd:3.5, range:35, expDrop:42, level:12,
+      sizeScale:1, animClass:'anim-walk',
+      goldRange:[7,15] // 난수 로직으로 7~15 사이에서 지급
+    },
+    goblin_archer: {
+      svgKind:'goblin_archer', hp:1200, atk:65, spd:3.5, range:30, expDrop:55, level:13,
+      sizeScale:1, animClass:'anim-walk',
+      goldRange:[8,17], // 난수 로직으로 8~17 사이에서 지급
+      // 화살 사격: 가로 150 x 세로 20 범위에 유저가 들어오면 1.5초 쿨타임마다 유저 위치를 향해 사격.
+      // 공격력의 25% 피해, 낮은 확률(5%)로 크리티컬(+25% 데미지) 발동. 로직 자체는 당근 던지기와 동일.
+      skills: [ { id:'arrow_shot', name:'화살 사격', cooldownMs:1500, percent:25, hitboxW:150, hitboxH:20, critChance:5, critDamagePercent:25 } ]
+    },
+    ogre_goblin: {
+      svgKind:'ogre_goblin', hp:38000, atk:130, spd:4, level:15,
+      sizeScale:15, animClass:'anim-walk',
+      isBoss:true, bossId:'ogre_goblin',
+      firstKillExp:800, firstKillGold:1000,
+      // 사거리 = 몸 크기(반지름) + 100px. 몸 크기(반지름) = 기본 아이콘 반지름(18px) x sizeScale(15) = 270px
+      range: Math.round(18 * 15) + 100,
+      bodyRadiusPx: 18 * 15,
+      skills: [
+        {
+          id:'log_throw', name:'나무 던지기', kind:'aoe_barrage',
+          cooldownMs:20000, volleyCount:3, volleyIntervalMs:700,
+          aoeRadiusPx:90, telegraphMs:2500,
+          percent:30, currentHpPercent:5, stunMs:1500
+        },
+        {
+          id:'ogre_whirlwind', name:'오우거 회오리', kind:'whirlwind',
+          cooldownMs:60000, durationMs:10000, chaseSpeedMult:0.6,
+          tickIntervalMs:1500, percent:20, maxHpPercent:3, radiusMult:1.1
+        }
+      ]
+    }
+  };
+
+  // dropTable(확률표) 대신 [min,max] 범위에서 난수로 골드를 지급할 때 사용
+  function rollGoldFromRange(range){
+    var min = range[0], max = range[1];
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  // 몬스터 종류에 따라 확률표(goldTable) 또는 난수 범위(goldRange) 방식으로 골드 지급
+  function rollMonsterGold(mon){
+    if(mon.goldRange) return rollGoldFromRange(mon.goldRange);
+    return rollGoldFromTable(mon.goldTable);
+  }
+
+  // 몬스터 처치 보상 지급. 보스는 계정당 최초 처치 1회에 한해서만 보상(이후 처치는 보상 없음).
+  // 일반 몬스터는 기존처럼 처치할 때마다 경험치/골드 지급.
+  function grantKillRewards(ch, mon){
+    if(mon.isBoss){
+      if(!ch.bossFirstKills) ch.bossFirstKills = {};
+      if(!ch.bossFirstKills[mon.bossId]){
+        ch.bossFirstKills[mon.bossId] = true;
+        gainExp(ch, mon.firstKillExp || 0);
+        ch.gold += (mon.firstKillGold || 0);
+      }
+      // 이미 최초 처치 보상을 받았다면 추가 보상 없음
+    }else{
+      gainExp(ch, mon.expDrop);
+      ch.gold += rollMonsterGold(mon);
+    }
+  }
+
+  function makeMonsterFromTemplate(key){
+    var t = MONSTER_TEMPLATES[key] || MONSTER_TEMPLATES.snail;
+    // spd: 이동속도(이동 루프에서 최대 이동거리 = spd * 3px), range: 몬스터 자체 사거리(px)
+    var skills = (t.skills || []).map(function(s){
+      // 스킬마다 독립된 쿨타임/상태를 갖도록 런타임 상태를 붙여서 복사
+      var copy = {};
+      Object.keys(s).forEach(function(k){ copy[k] = s[k]; });
+      copy.lastCast = 0;
+      return copy;
+    });
+    return {
+      hp:t.hp, maxHp:t.hp, atk:t.atk, spd:t.spd, range:t.range, expDrop:t.expDrop,
+      level:t.level, sizeScale:t.sizeScale || 1, animClass:t.animClass || 'anim-crawl',
+      goldTable:t.goldTable, goldRange:t.goldRange, svgKind:t.svgKind,
+      skills: skills,
+      isBoss: !!t.isBoss, bossId: t.bossId || null,
+      firstKillExp: t.firstKillExp || 0, firstKillGold: t.firstKillGold || 0,
+      bodyRadiusPx: t.bodyRadiusPx || 18,
+      whirlwindUntil: 0, whirlwindLastTick: 0 // 오우거 회오리 같은 특수 상태 이동/틱에 사용
+    };
+  }
+
+  function makeMonsterForArea(areaId){
+    var area = AREAS[areaId] || AREAS.meadow1;
+    return makeMonsterFromTemplate(area.monsterKey);
+  }
+
+  // dropTable: [[value, percentChance], ...] (percentChance 합계 100 기준)
+  function rollGoldFromTable(dropTable){
+    if(!dropTable || dropTable.length === 0) return 0;
+    var r = Math.random() * 100;
+    var acc = 0;
+    for(var i = 0; i < dropTable.length; i++){
+      acc += dropTable[i][1];
+      if(r < acc) return dropTable[i][0];
+    }
+    return dropTable[dropTable.length - 1][0];
+  }
+
+  // 모바일 조작 UI(왼쪽 아래 조이스틱 / 오른쪽 아래 스킬 단축키)에 몬스터가 겹쳐 가려지지 않도록
+  // 화면 하단 좌우 모서리는 스폰 금지 구역으로 둠(여유값은 각 UI 크기 + 배회 반경 포함)
+  var UI_KEEPOUT_BOTTOM_HEIGHT_PX = 200;
+  var UI_KEEPOUT_LEFT_WIDTH_PX = 190;   // 조이스틱(120px) + 배회 반경 여유
+  var UI_KEEPOUT_RIGHT_WIDTH_PX = 210;  // 스킬 단축키(3x50px 그리드) + 배회 반경 여유
+
+  function isInMobileControlKeepout(x, y, stageW, stageH){
+    if(y < stageH - UI_KEEPOUT_BOTTOM_HEIGHT_PX) return false;
+    return x < UI_KEEPOUT_LEFT_WIDTH_PX || x > stageW - UI_KEEPOUT_RIGHT_WIDTH_PX;
+  }
+
+  // 화면 회전 등으로 기존 몬스터 좌표를 비율 재조정할 때, 결과 좌표가 조작 UI 영역에 들어가면
+  // 그 구역 바로 위로 밀어냄(스폰 시점 회피 로직과 별개로, 리사이즈 시에도 겹침을 방지)
+  function nudgeOutOfMobileControlKeepout(x, y, stageW, stageH){
+    if(!isInMobileControlKeepout(x, y, stageW, stageH)) return { x:x, y:y };
+    var safeY = stageH - UI_KEEPOUT_BOTTOM_HEIGHT_PX - 10;
+    if(safeY < SPAWN_EDGE_MARGIN_PX) safeY = SPAWN_EDGE_MARGIN_PX;
+    return { x:x, y:safeY };
+  }
+
+  // 플레이어 시작 위치와 이미 배치된 몬스터(+포탈)를 피해서 무작위 스폰 좌표(스테이지 기준 px)를 하나 뽑음
+  function findSpawnPoint(stageW, stageH, playerStartX, playerStartY, placedPoints){
+    for(var attempt = 0; attempt < SPAWN_MAX_ATTEMPTS; attempt++){
+      var x = SPAWN_EDGE_MARGIN_PX + Math.random() * (stageW - SPAWN_EDGE_MARGIN_PX * 2);
+      var y = SPAWN_EDGE_MARGIN_PX + Math.random() * (stageH - SPAWN_EDGE_MARGIN_PX * 2);
+      if(Math.hypot(x - playerStartX, y - playerStartY) < SPAWN_KEEPOUT_FROM_PLAYER_PX) continue;
+      if(isInMobileControlKeepout(x, y, stageW, stageH)) continue;
+      var tooCloseToOther = placedPoints.some(function(p){
+        return Math.hypot(x - p.x, y - p.y) < SPAWN_MIN_GAP_PX;
+      });
+      if(tooCloseToOther) continue;
+      return { x:x, y:y };
+    }
+    // 조건을 다 만족하는 자리를 못 찾으면, 최소한 '플레이어 회피(180px)' 조건만은 지켜서 배치
+    var fx, fy, tries = 0;
+    do{
+      fx = SPAWN_EDGE_MARGIN_PX + Math.random() * (stageW - SPAWN_EDGE_MARGIN_PX * 2);
+      fy = SPAWN_EDGE_MARGIN_PX + Math.random() * (stageH - SPAWN_EDGE_MARGIN_PX * 2);
+      tries++;
+    } while(Math.hypot(fx - playerStartX, fy - playerStartY) < SPAWN_KEEPOUT_FROM_PLAYER_PX && tries < 300);
+    return { x:fx, y:fy };
+  }
+
+  function buildWorld(){
+    var stage = document.getElementById('harbor-stage');
+    stage.innerHTML = '';
+    state.monsters = {};
+
+    var area = AREAS[state.currentAreaId] || AREAS.meadow1;
+
+    // 지역 이름은 지도 위에 별도로 띄우지 않고 상단 HUD(캐릭터 정보 카드 하단)에 표시
+    var areaNameEl = document.getElementById('hud-area-name');
+    if(areaNameEl) areaNameEl.textContent = area.name;
+
+    // 이 시점에는 screen-game이 이미 active 상태라 실제 렌더링 크기를 읽을 수 있음
+    var stageRect = stage.getBoundingClientRect();
+    var stageW = stageRect.width;
+    var stageH = stageRect.height;
+    // PLAYER_POS는 맵 맨 아래쪽 "기준점". 유저는 이 기준점보다 살짝 위(안쪽)에서 스폰하고,
+    // "이전 지역" 포탈은 오히려 이 기준점(맨 아래)에 둬서, 유저가 스폰 직후 포탈을 등지고
+    // 자연스럽게 앞쪽으로 나아가게 만듦(뒤로 일부러 걸어가야만 포탈을 밟게 됨).
+    var baseX = stageW * (parseFloat(PLAYER_POS.left) / 100);
+    var baseY = stageH * (parseFloat(PLAYER_POS.top) / 100);
+    var playerStartX, playerStartY;
+    if(state.entryDirection === 'backward' && area.nextAreaId){
+      // 이전 지역 포탈을 타고 들어왔으면, 이 지역의 "다음 지역" 포탈(최상단) 바로 앞쪽에 스폰.
+      // 두 지역을 잇는 통로의 반대쪽 끝에서 나오는 셈이라 항상 포탈을 등지는 배치가 유지됨.
+      playerStartX = stageW * 0.5;
+      playerStartY = PORTAL_TOP_MARGIN_PX + PREV_PORTAL_OFFSET_PX;
+    }else{
+      playerStartX = baseX;
+      playerStartY = Math.max(PORTAL_TOP_MARGIN_PX + 60, baseY - PREV_PORTAL_OFFSET_PX);
+    }
+
+    var placedPoints = [];
+
+    // 다음 지역이 있으면 맵 최상단 중앙에 포탈 배치
+    if(area.nextAreaId){
+      var nextPortalX = stageW * 0.5;
+      var nextPortalY = PORTAL_TOP_MARGIN_PX;
+      placedPoints.push({ x:nextPortalX, y:nextPortalY });
+      var nextPortalEl = document.createElement('div');
+      nextPortalEl.className = 'area-portal area-portal-next';
+      nextPortalEl.id = 'area-portal-next';
+      nextPortalEl.style.left = nextPortalX + 'px';
+      nextPortalEl.style.top = nextPortalY + 'px';
+      nextPortalEl.innerHTML = '<div class="portal-label">다음 지역</div>';
+      stage.appendChild(nextPortalEl);
+    }
+
+    // 이전 지역이 있으면(시작의 초원 1 제외) 맵 맨 아래쪽 기준점에 돌아가는 포탈 배치(유저 스폰 위치보다 뒤쪽)
+    var prevAreaId = findPrevAreaId(state.currentAreaId);
+    if(prevAreaId){
+      var prevPortalX = baseX;
+      var prevPortalY = baseY;
+      placedPoints.push({ x:prevPortalX, y:prevPortalY });
+      var prevPortalEl = document.createElement('div');
+      prevPortalEl.className = 'area-portal area-portal-prev';
+      prevPortalEl.id = 'area-portal-prev';
+      prevPortalEl.style.left = prevPortalX + 'px';
+      prevPortalEl.style.top = prevPortalY + 'px';
+      prevPortalEl.innerHTML = '<div class="portal-label">이전 지역</div>';
+      stage.appendChild(prevPortalEl);
+    }
+
+    if(area.isBossArea){
+      // 보스 지역: 몬스터 1마리만 맵 최상단 쪽에 고정 배치(무작위 배치/개체 수 로직을 타지 않음)
+      var bossSlotId = 'm0';
+      var bossX = stageW * 0.5;
+      var bossY = Math.max(PORTAL_TOP_MARGIN_PX + 90, stageH * 0.2);
+      var bossSlotEl = makeSlotEl(bossSlotId);
+      placeSlotHome(bossSlotEl, bossX, bossY);
+      stage.appendChild(bossSlotEl);
+      state.monsters[bossSlotId] = makeMonsterForArea(state.currentAreaId);
+    }else{
+      var monsterCount = area.monsterCount || MONSTER_COUNT;
+      for(var i = 0; i < monsterCount; i++){
+        var slotId = 'm' + i;
+        var point = findSpawnPoint(stageW, stageH, playerStartX, playerStartY, placedPoints);
+        placedPoints.push(point);
+        var slotEl = makeSlotEl(slotId);
+        placeSlotHome(slotEl, point.x, point.y);
+        stage.appendChild(slotEl);
+        state.monsters[slotId] = makeMonsterForArea(state.currentAreaId);
+      }
+    }
+
+    var player = document.createElement('div');
+    player.className = 'player-avatar';
+    player.id = 'player-avatar';
+    // 반응형 재계산을 위해 처음부터 %가 아닌 px로 위치를 고정
+    player.style.top = playerStartY + 'px';
+    player.style.left = playerStartX + 'px';
+    stage.appendChild(player);
+
+    renderWorld();
+    computeInRangeSlots();
+    captureStageSize();
+    // 지역에 막 들어온 직후에는 포탈 판정을 잠깐 쉬어서, 도착하자마자 근처 포탈에 바로 튕겨나가지 않게 함
+    state.portalLockUntil = Date.now() + 800;
+  }
+
+  // AREAS 체인에서 area가 다음 지역으로 지정한 곳이 targetAreaId인 지역의 id를 찾음(즉, targetAreaId의 "이전 지역")
+  function findPrevAreaId(targetAreaId){
+    var ids = Object.keys(AREAS);
+    for(var i = 0; i < ids.length; i++){
+      if(AREAS[ids[i]].nextAreaId === targetAreaId) return ids[i];
+    }
+    return null;
+  }
+
+  // 플레이어가 포탈(다음/이전) 반경 안에 들어왔는지 확인하고, 들어왔으면 해당 지역으로 이동
+  function checkPortalCollision(){
+    if(Date.now() < (state.portalLockUntil || 0)) return; // 지역 진입 직후 잠깐은 판정하지 않음
+    var playerEl = document.getElementById('player-avatar');
+    if(!playerEl) return;
+    var pRect = playerEl.getBoundingClientRect();
+    var px = pRect.left + pRect.width / 2;
+    var py = pRect.top + pRect.height / 2;
+
+    ['area-portal-next', 'area-portal-prev'].forEach(function(portalId){
+      var portalEl = document.getElementById(portalId);
+      if(!portalEl) return;
+      var prtRect = portalEl.getBoundingClientRect();
+      var qx = prtRect.left + prtRect.width / 2;
+      var qy = prtRect.top + prtRect.height / 2;
+      if(Math.hypot(px - qx, py - qy) <= PORTAL_TRIGGER_RADIUS_PX){
+        if(portalId === 'area-portal-next') goToNextArea();
+        else goToPrevArea();
+      }
+    });
+  }
+
+  function goToNextArea(){
+    var area = AREAS[state.currentAreaId];
+    if(!area || !area.nextAreaId) return;
+    state.currentAreaId = area.nextAreaId;
+    state.entryDirection = 'forward';
+    saveCurrentAreaToCharacter();
+    buildWorld();
+  }
+
+  function goToPrevArea(){
+    var prevAreaId = findPrevAreaId(state.currentAreaId);
+    if(!prevAreaId) return;
+    state.currentAreaId = prevAreaId;
+    state.entryDirection = 'backward';
+    saveCurrentAreaToCharacter();
+    buildWorld();
+  }
+
+  // 현재 위치한 지역을 캐릭터 데이터에 저장(재접속 시 이어서 시작하기 위함)
+  function saveCurrentAreaToCharacter(){
+    if(!state.character || !state.account) return;
+    state.character.currentAreaId = state.currentAreaId;
+    saveCharacter(state.account.id, state.character);
+  }
+
+  // 플레이어 위치 기준 반경(ATTACK_RADIUS_PX) 안에 들어오는 슬롯을 계산.
+  // 플레이어/몬스터가 움직일 때마다 다시 호출해서 최신 상태로 갱신함.
+  function computeInRangeSlots(){
+    var player = document.getElementById('player-avatar');
+    if(!player) return;
+    var pRect = player.getBoundingClientRect();
+    var px = pRect.left + pRect.width / 2;
+    var py = pRect.top + pRect.height / 2;
+    // 패시브 스킬(야누스 익스텐션 MK1)로 공격 범위가 늘어날 수 있음
+    var passive = state.character ? getPassiveBonus(state.character) : { atk:0, range:0, targets:0 };
+    var effectiveRadius = ATTACK_RADIUS_PX + passive.range;
+    var result = [];
+    document.querySelectorAll('.mon-slot').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      var cx = r.left + r.width / 2;
+      var cy = r.top + r.height / 2;
+      var dist = Math.hypot(cx - px, cy - py);
+      if(dist <= effectiveRadius){
+        result.push(el.dataset.slot);
+        el.classList.add('in-range');
+      }else{
+        el.classList.remove('in-range');
+      }
+    });
+    state.inRangeSlots = result;
+  }
+
+  function makeSlotEl(slotId){
+    var el = document.createElement('div');
+    el.className = 'mon-slot';
+    el.dataset.slot = slotId;
+    return el;
+  }
+
+  // 몬스터의 스폰/홈 위치를 지정(부모인 harbor-stage 기준 px 좌표).
+  // 이후 랜덤 이동은 이 홈 위치를 중심으로 한 정해진 반경 안에서만 벗어나게 함.
+  function placeSlotHome(el, homeLeft, homeTop){
+    el.style.left = homeLeft + 'px';
+    el.style.top = homeTop + 'px';
+    el.dataset.homeLeft = homeLeft;
+    el.dataset.homeTop = homeTop;
+  }
+
+  function renderWorld(){
+    Object.keys(state.monsters).forEach(function(slotId){
+      var el = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+      if(!el) return;
+      var mon = state.monsters[slotId];
+      if(!mon){
+        el.classList.remove('has-monster');
+        el.innerHTML = '';
+        return;
+      }
+      el.classList.add('has-monster');
+      var pct = Math.max(0, mon.hp / mon.maxHp * 100);
+      // 이동 방향(좌우 반전)은 el.dataset.facing에 저장돼 있고, 이동 루프가 계속 갱신함.
+      // 여기서는 그 값을 읽어서 재렌더링 후에도 방향이 유지되게만 해줌.
+      var facing = el.dataset.facing || '1';
+      var scale = mon.sizeScale || 1;
+      var animClass = mon.animClass || 'anim-crawl';
+      // 레벨 표시(예: Lv.N)는 인게임에 걸지 않기로 함 - 필요 시 데이터(mon.level)는 그대로 갖고 있음
+      el.innerHTML =
+        '<div class="mon-icon-flip" style="transform:scaleX(' + facing + ') scale(' + scale + ');">' +
+          '<div class="mon-icon-anim ' + animClass + '">' + svgForKind(mon.svgKind) + '</div>' +
+        '</div>' +
+        '<div class="mon-hp"><div class="mon-hp-fill" style="width:' + pct + '%"></div></div>';
+    });
+  }
+
+  function startRespawnLoop(){
+    setInterval(function(){
+      var area = AREAS[state.currentAreaId];
+      if(area && area.isBossArea) return; // 보스 지역은 리젠하지 않음
+      var missing = Object.keys(state.monsters).filter(function(k){ return state.monsters[k] === null; });
+      if(missing.length === 0) return;
+      missing.forEach(function(slotId){
+        state.monsters[slotId] = makeMonsterForArea(state.currentAreaId);
+        var el = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+        if(el) placeSlotHome(el, parseFloat(el.dataset.homeLeft), parseFloat(el.dataset.homeTop));
+      });
+      renderWorld();
+    }, RESPAWN_MS);
+  }
+
+  // ---------------- 몬스터 랜덤 이동(AI) ----------------
+  var MONSTER_MOVE_INTERVAL_MS = 200;
+  var MONSTER_WANDER_RADIUS_PX = 40; // 스폰(홈) 위치에서 벗어날 수 있는 최대 반경
+  var monsterMovementLoopStarted = false;
+
+  function startMonsterMovementLoop(){
+    if(monsterMovementLoopStarted) return;
+    monsterMovementLoopStarted = true;
+    setInterval(function(){
+      var stageEl = document.getElementById('harbor-stage');
+      if(!document.getElementById('screen-game').classList.contains('active') || !stageEl) return;
+      var stageW = stageEl.clientWidth;
+      var stageH = stageEl.clientHeight;
+      var now = Date.now();
+      var playerEl = document.getElementById('player-avatar');
+      var playerLeft = playerEl ? parseFloat(playerEl.style.left) : null;
+      var playerTop = playerEl ? parseFloat(playerEl.style.top) : null;
+
+      document.querySelectorAll('.mon-slot').forEach(function(el){
+        var mon = state.monsters[el.dataset.slot];
+        if(!mon) return; // 죽어서 빈 슬롯은 움직이지 않음
+        var homeLeft = parseFloat(el.dataset.homeLeft);
+        var homeTop = parseFloat(el.dataset.homeTop);
+        var curLeft = parseFloat(el.style.left) || homeLeft;
+        var curTop = parseFloat(el.style.top) || homeTop;
+
+        // 오우거 회오리 등으로 "추적 모드"인 동안에는 무작위 배회 대신 유저를 직선으로 쫓아감
+        var inChaseMode = mon.whirlwindUntil && now < mon.whirlwindUntil && playerLeft !== null;
+        var angle, dist;
+        if(inChaseMode){
+          angle = Math.atan2(playerTop - curTop, playerLeft - curLeft);
+          var chaseMult = (mon.whirlwindSkill && mon.whirlwindSkill.chaseSpeedMult) || 1;
+          dist = mon.spd * chaseMult * 3;
+        }else{
+          angle = Math.random() * Math.PI * 2;
+          dist = Math.random() * (mon.spd * 3); // 최대 이동속도 x 3px
+        }
+        var nextLeft = curLeft + Math.cos(angle) * dist;
+        var nextTop = curTop + Math.sin(angle) * dist;
+        if(!inChaseMode){
+          // 평소엔 스폰 지점 기준 반경 안에서만 돌아다니게 제한
+          nextLeft = Math.max(homeLeft - MONSTER_WANDER_RADIUS_PX, Math.min(homeLeft + MONSTER_WANDER_RADIUS_PX, nextLeft));
+          nextTop = Math.max(homeTop - MONSTER_WANDER_RADIUS_PX, Math.min(homeTop + MONSTER_WANDER_RADIUS_PX, nextTop));
+        }
+        // 초원 바깥으로 나가지 않게 스테이지 경계로도 한 번 더 제한
+        nextLeft = Math.max(0, Math.min(stageW, nextLeft));
+        nextTop = Math.max(0, Math.min(stageH, nextTop));
+        el.style.left = nextLeft + 'px';
+        el.style.top = nextTop + 'px';
+
+        // 실제로 좌우로 움직인 방향에 맞춰 아이콘을 좌우 반전(이동 애니메이션용).
+        // dataset에 저장해두면 renderWorld()가 다시 그릴 때도 방향이 유지됨.
+        var dx = nextLeft - curLeft;
+        if(dx < -0.3) el.dataset.facing = '-1';
+        else if(dx > 0.3) el.dataset.facing = '1';
+        var flipEl = el.querySelector('.mon-icon-flip');
+        if(flipEl){
+          var facing = el.dataset.facing || '1';
+          flipEl.style.transform = 'scaleX(' + facing + ') scale(' + (mon.sizeScale || 1) + ');';
+        }
+      });
+      // 몬스터 위치가 바뀌었으니 플레이어 공격 범위 판정도 다시 계산
+      computeInRangeSlots();
+    }, MONSTER_MOVE_INTERVAL_MS);
+  }
+
+  // ---------------- 전투: 플레이어 공격 범위(100px) 자동 공격 + 몬스터 자체 반격 범위(10px) ----------------
+  // 데미지 숫자 팝업: 일반은 검정, 크리티컬은 빨간색+강조 이펙트, 플레이어가 맞은 피해는 별도 스타일
+  function spawnDamagePopup(stage, stageRect, viewportX, viewportY, text, kind){
+    if(!stage || !stageRect) return;
+    var el = document.createElement('div');
+    el.className = 'dmg-popup' + (kind === 'crit' ? ' crit' : '') + (kind === 'taken' ? ' taken' : '');
+    el.textContent = text;
+    el.style.left = (viewportX - stageRect.left) + 'px';
+    el.style.top = (viewportY - stageRect.top) + 'px';
+    stage.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 900);
+  }
+
+  function autoAttackTick(){
+    var ch = state.character;
+    if(!ch) return;
+    var targets = state.inRangeSlots.filter(function(slotId){ return !!state.monsters[slotId]; });
+    if(targets.length === 0) return;
+
+    var stage = document.getElementById('harbor-stage');
+    var stageRect = stage ? stage.getBoundingClientRect() : null;
+    var playerEl = document.getElementById('player-avatar');
+    var pRect = playerEl ? playerEl.getBoundingClientRect() : null;
+    var px = pRect ? pRect.left + pRect.width / 2 : null;
+    var py = pRect ? pRect.top + pRect.height / 2 : null;
+
+    // 기본 공격은 주변(사거리 안) 몬스터 중 가장 가까운 순으로 최대 마릿수까지만 맞음.
+    // 최대 마릿수는 기본값에 패시브 스킬 등의 보너스가 더해져 늘어날 수 있음.
+    var passive = getPassiveBonus(ch);
+    var maxTargets = BASE_MAX_TARGETS + passive.targets;
+
+    var candidates = targets.map(function(slotId){
+      var el = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+      var rect = el ? el.getBoundingClientRect() : null;
+      var dist = (rect && px !== null) ? Math.hypot((rect.left + rect.width / 2) - px, (rect.top + rect.height / 2) - py) : Infinity;
+      return { slotId:slotId, el:el, rect:rect, dist:dist };
+    }).sort(function(a, b){ return a.dist - b.dist; }).slice(0, maxTargets);
+
+    candidates.forEach(function(c){
+      var slotId = c.slotId;
+      var mon = state.monsters[slotId];
+      var mRect = c.rect;
+
+      // 플레이어 공격: 숙련도 기반으로 데미지를 굴리고, 크리티컬 확률만큼 크리티컬 발동 시 배율 적용
+      var isCrit = Math.random() * 100 < ch.critChance;
+      var rolledAtk = rollDamageWithProficiency(ch.atk, ch.proficiency);
+      var dmg = isCrit ? Math.round(rolledAtk * (1 + ch.critDamage / 100)) : rolledAtk;
+      mon.hp -= dmg;
+
+      if(mRect){
+        spawnDamagePopup(stage, stageRect, mRect.left + mRect.width / 2, mRect.top + mRect.height / 2, String(dmg), isCrit ? 'crit' : 'normal');
+      }
+
+      if(mon.hp <= 0){
+        state.monsters[slotId] = null;
+        grantKillRewards(ch, mon);
+        saveCharacter(state.account.id, ch);
+      }
+    });
+
+    renderStats();
+    renderWorld();
+  }
+
+  // ---------------- 몬스터 공격: 야누스와 별개로, 몬스터 자체 사거리(mon.range) 안에 플레이어가 있으면
+  // 1.5초마다 자기 공격력의 100%만큼 피해를 입힘(플레이어가 몬스터를 공격 중인지와 무관) ----------------
+  var MONSTER_ATTACK_INTERVAL_MS = 1500;
+
+  function monsterAttackTick(){
+    var ch = state.character;
+    if(!ch) return;
+    var stage = document.getElementById('harbor-stage');
+    var stageRect = stage ? stage.getBoundingClientRect() : null;
+    var playerEl = document.getElementById('player-avatar');
+    var pRect = playerEl ? playerEl.getBoundingClientRect() : null;
+    if(!pRect) return;
+    var px = pRect.left + pRect.width / 2;
+    var py = pRect.top + pRect.height / 2;
+
+    var hit = false;
+    Object.keys(state.monsters).forEach(function(slotId){
+      var mon = state.monsters[slotId];
+      if(!mon) return;
+      var monEl = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+      if(!monEl) return;
+      var mRect = monEl.getBoundingClientRect();
+      var mx = mRect.left + mRect.width / 2;
+      var my = mRect.top + mRect.height / 2;
+      var dist = Math.hypot(mx - px, my - py);
+      if(dist <= mon.range){
+        // 몬스터 공격력을 숙련도 기준으로 굴린 뒤 유저 방어력만큼 감소. 방어력이 더 높아도 최소 1의 피해는 들어감
+        var rolledMonAtk = rollDamageWithProficiency(mon.atk, MONSTER_PROFICIENCY);
+        var takenDmg = Math.max(rolledMonAtk - ch.def, 1);
+        ch.hp = Math.max(ch.hp - takenDmg, 1); // 사망 처리는 추후 규칙에서 정의 예정, 우선 최소 1로 유지
+        spawnDamagePopup(stage, stageRect, px, pRect.top, String(takenDmg), 'taken');
+        hit = true;
+      }
+    });
+
+    if(hit) renderStats();
+  }
+
+  // ---------------- 몬스터 스킬: 당근 던지기(사나운 포푸니) ----------------
+  // 몬스터별 접촉 사거리(range) 공격과 별개로, 사각형 범위(hitboxW x hitboxH) 안에 유저가 들어오면
+  // 몬스터마다 독립된 쿨타임으로 유저 위치를 향해 원거리 공격을 시전함.
+  function monsterSkillTick(){
+    var ch = state.character;
+    if(!ch) return;
+    var playerEl = document.getElementById('player-avatar');
+    if(!playerEl) return;
+    var pRect = playerEl.getBoundingClientRect();
+    var px = pRect.left + pRect.width / 2;
+    var py = pRect.top + pRect.height / 2;
+    var stage = document.getElementById('harbor-stage');
+    var stageRect = stage ? stage.getBoundingClientRect() : null;
+    var now = Date.now();
+
+    Object.keys(state.monsters).forEach(function(slotId){
+      var mon = state.monsters[slotId];
+      if(!mon) return;
+      var el = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+      if(!el) return;
+      var mRect = el.getBoundingClientRect();
+      var mx = mRect.left + mRect.width / 2;
+      var my = mRect.top + mRect.height / 2;
+
+      // 회오리 등 "추적/지속" 상태가 진행 중이면 주기적 데미지 판정만 하고 다른 스킬 발동은 건너뜀
+      if(mon.whirlwindUntil && now < mon.whirlwindUntil){
+        var wSkill = mon.whirlwindSkill;
+        if(wSkill && now - (mon.whirlwindLastTick || 0) >= wSkill.tickIntervalMs){
+          mon.whirlwindLastTick = now;
+          var wDist = Math.hypot(px - mx, py - my);
+          var atkRadius = (mon.bodyRadiusPx || 18) * wSkill.radiusMult;
+          if(wDist <= atkRadius){
+            var wRolled = rollDamageWithProficiency(mon.atk, MONSTER_PROFICIENCY);
+            var wDmg = Math.round(wRolled * (wSkill.percent / 100) + ch.maxHp * (wSkill.maxHpPercent / 100));
+            wDmg = Math.max(wDmg - ch.def, 1);
+            ch.hp = Math.max(ch.hp - wDmg, 1);
+            spawnDamagePopup(stage, stageRect, px, py, String(wDmg), 'taken');
+            renderStats();
+          }
+        }
+        return;
+      }
+
+      if(!mon.skills || mon.skills.length === 0) return;
+
+      mon.skills.forEach(function(skill){
+        if(now - (skill.lastCast || 0) < skill.cooldownMs) return;
+
+        if(skill.kind === 'whirlwind'){
+          skill.lastCast = now;
+          mon.whirlwindUntil = now + skill.durationMs;
+          mon.whirlwindSkill = skill;
+          mon.whirlwindLastTick = 0;
+          return;
+        }
+
+        if(skill.kind === 'aoe_barrage'){
+          skill.lastCast = now;
+          triggerAoeBarrage(mon, skill);
+          return;
+        }
+
+        // 기본(zone_throw): 상하좌우+대각선 8방향 판정 박스(가로 x 세로) 안에 유저가 있으면 발동
+        var dx = px - mx, dy = py - my;
+        var dist = Math.hypot(dx, dy);
+        var inZone;
+        if(dist < 0.001){
+          inZone = true;
+        }else{
+          var angle = Math.atan2(dy, dx);
+          var step = Math.PI / 4;
+          var snapped = Math.round(angle / step) * step;
+          var cosA = Math.cos(-snapped), sinA = Math.sin(-snapped);
+          var localX = dx * cosA - dy * sinA;
+          var localY = dx * sinA + dy * cosA;
+          inZone = Math.abs(localX) <= skill.hitboxW / 2 && Math.abs(localY) <= skill.hitboxH / 2;
+        }
+        if(!inZone) return;
+
+        skill.lastCast = now;
+        playMonsterThrowAnimation(el, mon, mx, my, px, py, stage, stageRect);
+
+        var rolledMonAtk = rollDamageWithProficiency(mon.atk, MONSTER_PROFICIENCY);
+        var isSkillCrit = skill.critChance ? (Math.random() * 100 < skill.critChance) : false;
+        var baseDmg = Math.round(rolledMonAtk * (skill.percent / 100));
+        var critDmg = isSkillCrit ? Math.round(baseDmg * (1 + (skill.critDamagePercent || 0) / 100)) : baseDmg;
+        var dmg = Math.max(critDmg - ch.def, 1);
+
+        // 투사체가 날아가는 시간만큼 살짝 지연 후 피격 처리
+        setTimeout(function(){
+          if(!state.character) return;
+          state.character.hp = Math.max(state.character.hp - dmg, 1);
+          spawnDamagePopup(stage, stageRect, px, pRect.top, String(dmg), isSkillCrit ? 'crit' : 'taken');
+          renderStats();
+        }, 220);
+      });
+    });
+  }
+
+  // 나무 던지기: volleyCount(3)개를 volleyIntervalMs(0.7초) 간격으로, 매번 그 시점의 유저 위치에 투척
+  function triggerAoeBarrage(mon, skill){
+    for(var i = 0; i < skill.volleyCount; i++){
+      setTimeout(function(){ fireOneLog(mon, skill); }, i * skill.volleyIntervalMs);
+    }
+  }
+
+  function fireOneLog(mon, skill){
+    if(!state.character || !mon || mon.hp <= 0) return;
+    var playerEl = document.getElementById('player-avatar');
+    var stage = document.getElementById('harbor-stage');
+    if(!playerEl || !stage) return;
+    var pRect = playerEl.getBoundingClientRect();
+    var stageRect = stage.getBoundingClientRect();
+    var targetX = pRect.left + pRect.width / 2 - stageRect.left;
+    var targetY = pRect.top + pRect.height / 2 - stageRect.top;
+
+    var el = document.createElement('div');
+    el.className = 'log-telegraph';
+    el.style.width = (skill.aoeRadiusPx * 2) + 'px';
+    el.style.height = (skill.aoeRadiusPx * 2) + 'px';
+    el.style.left = targetX + 'px';
+    el.style.top = targetY + 'px';
+    var fill = document.createElement('div');
+    fill.className = 'log-telegraph-fill';
+    fill.style.animationDuration = skill.telegraphMs + 'ms';
+    el.appendChild(fill);
+    stage.appendChild(el);
+
+    setTimeout(function(){
+      el.remove();
+      var ch = state.character;
+      if(!ch) return;
+      var curPlayerEl = document.getElementById('player-avatar');
+      if(!curPlayerEl) return;
+      var curRect = curPlayerEl.getBoundingClientRect();
+      var curStage = document.getElementById('harbor-stage');
+      var curStageRect = curStage ? curStage.getBoundingClientRect() : stageRect;
+      var curX = curRect.left + curRect.width / 2 - curStageRect.left;
+      var curY = curRect.top + curRect.height / 2 - curStageRect.top;
+      var dist = Math.hypot(curX - targetX, curY - targetY);
+      if(dist <= skill.aoeRadiusPx){
+        var rolled = rollDamageWithProficiency(mon.atk, MONSTER_PROFICIENCY);
+        var dmg = Math.round(rolled * (skill.percent / 100) + ch.hp * (skill.currentHpPercent / 100));
+        dmg = Math.max(dmg, 1);
+        ch.hp = Math.max(ch.hp - dmg, 1);
+        applyStun(skill.stunMs);
+        spawnDamagePopup(curStage, curStageRect, curRect.left + curRect.width / 2, curRect.top, String(dmg), 'taken');
+        renderStats();
+      }
+    }, skill.telegraphMs);
+  }
+
+  // 기절: stunnedUntil 시각까지 이동/액티브 스킬 사용 불가
+  function applyStun(stunMs){
+    if(!state.character || !stunMs) return;
+    state.character.stunnedUntil = Date.now() + stunMs;
+  }
+
+  function isPlayerStunned(){
+    return !!(state.character && state.character.stunnedUntil && Date.now() < state.character.stunnedUntil);
+  }
+
+  function startMonsterSkillLoop(){
+    setInterval(function(){
+      if(!document.getElementById('screen-game').classList.contains('active')) return;
+      monsterSkillTick();
+    }, 250);
+  }
+
+  // 몬스터의 던지기 자세(마지막 프레임은 당근이 손을 떠난 릴리즈 포즈) + 당근 투사체 애니메이션
+  function playMonsterThrowAnimation(el, mon, mx, my, px, py, stage, stageRect){
+    var flipEl = el.querySelector('.mon-icon-flip');
+    if(flipEl){
+      var facing = el.dataset.facing || '1';
+      var scale = mon.sizeScale || 1;
+      var base = 'scaleX(' + facing + ') scale(' + scale + ')';
+      flipEl.style.transition = 'transform .12s ease-out';
+      flipEl.style.transform = base + ' rotate(-16deg) scale(1.08)'; // 준비(윈드업) 자세
+      setTimeout(function(){
+        flipEl.style.transform = base + ' rotate(8deg)'; // 당근이 손을 떠나는 릴리즈(마지막) 자세
+        setTimeout(function(){
+          flipEl.style.transition = 'transform .12s linear';
+          flipEl.style.transform = base; // 원래 자세로 복귀
+        }, 140);
+      }, 120);
+    }
+
+    if(!stage || !stageRect) return;
+    var proj = document.createElement('div');
+    proj.className = 'carrot-projectile';
+    proj.innerHTML = '<svg viewBox="0 0 20 20"><path d="M2 10 L16 6 L18 8 L4 12 Z" fill="#e8842c" stroke="#a85c1b" stroke-width="1"/></svg>';
+    var startX = mx - stageRect.left, startY = my - stageRect.top;
+    var endX = px - stageRect.left, endY = py - stageRect.top;
+    proj.style.left = startX + 'px';
+    proj.style.top = startY + 'px';
+    proj.style.transform = 'translate(-50%,-50%)';
+    stage.appendChild(proj);
+    // 던지기 준비(120ms) 후에 투사체가 날아가기 시작해서 릴리즈 타이밍과 맞춤
+    setTimeout(function(){
+      proj.style.transform = 'translate(-50%,-50%) translate(' + (endX - startX) + 'px,' + (endY - startY) + 'px)';
+    }, 120);
+    setTimeout(function(){ proj.remove(); }, 400);
+  }
+
+  // ---------------- 액티브 스킬 발동: 단축키(Z X C A S D) ----------------
+  document.addEventListener('keydown', function(e){
+    if(!document.getElementById('screen-game').classList.contains('active')) return;
+    var key = e.key.toLowerCase();
+    var idx = HOTBAR_KEYS.indexOf(key);
+    if(idx === -1) return;
+    var ch = state.character;
+    if(!ch || !ch.hotbar) return;
+    var skillId = ch.hotbar[idx];
+    if(!skillId) return;
+    castActiveSkill(skillId);
+  });
+
+  function castActiveSkill(skillId){
+    var ch = state.character;
+    if(!ch) return false;
+    if(isPlayerStunned()) return false; // 기절 중에는 액티브 스킬 사용 불가
+    var def = findSkillDef(skillId);
+    if(!def || def.type !== 'active') return false;
+    var lvl = ch.skills[skillId] || 0;
+    if(ch.level < def.reqLevel || lvl <= 0) return false;
+
+    var cd = def.cooldownMs || 0;
+    var last = state.skillCooldowns[skillId] || 0;
+    var now = Date.now();
+    if(now - last < cd) return false; // 쿨타임 중이라 사용 불가
+
+    var busyUntil = state.skillBusyUntil[skillId] || 0;
+    if(now < busyUntil) return false; // 시전 중이거나 후딜레이 중이라 사용 불가
+
+    state.skillCooldowns[skillId] = now;
+    var castMs = def.castTimeMs || 0;
+    var postMs = def.postDelayMs || 0;
+    state.skillBusyUntil[skillId] = now + castMs + postMs;
+    updateHotbarCooldownDisplay();
+
+    if(skillId === 'electric_reaction'){
+      playElectricReactionEffect(castMs); // 이펙트는 시전시간 동안 재생(시각 연출용)
+      // 데미지는 시전 즉시 적용(나중에 후딜 캔슬이 생겨도 데미지 누락이 없도록 함)
+      performElectricReaction(ch, def, lvl);
+    }
+    return true;
+  }
+
+  // 전기 반응: 사거리 안 가까운 순 최대 baseTargets마리에게, baseHits회에 걸쳐
+  // 공격력의 (basePercent + (레벨-1)*percentPerLevel)% 데미지
+  // 전기 반응 시전 이펙트: 야누스 테두리에 하늘색 원형 테두리가 반짝이며 지그재그 번개가 짧게 튐(시전시간 동안 재생)
+  function electricRingSVG(){
+    var zigzags = '';
+    for(var i = 0; i < 8; i++){
+      var angle = i * 45;
+      var delay = (i * 0.05).toFixed(2);
+      zigzags += '<g transform="rotate(' + angle + ' 30 30)" style="animation-delay:' + delay + 's;">' +
+        '<polyline points="30,4 33,10 28,14 32,20" fill="none" stroke="#8fe3ff" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '</g>';
+    }
+    return '<svg viewBox="0 0 60 60" class="electric-ring-svg">' +
+      '<circle cx="30" cy="30" r="20" fill="none" stroke="#8fe3ff" stroke-width="2.4"/>' +
+      zigzags +
+      '</svg>';
+  }
+
+  function playElectricReactionEffect(castMs){
+    var stage = document.getElementById('harbor-stage');
+    var stageRect = stage ? stage.getBoundingClientRect() : null;
+    var playerEl = document.getElementById('player-avatar');
+    var playerRect = playerEl ? playerEl.getBoundingClientRect() : null;
+    if(!stage || !stageRect || !playerRect) return;
+
+    var cx = playerRect.left + playerRect.width / 2 - stageRect.left;
+    var cy = playerRect.top + playerRect.height / 2 - stageRect.top;
+
+    var el = document.createElement('div');
+    el.className = 'electric-reaction-fx';
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    el.innerHTML = electricRingSVG();
+    var svgEl = el.querySelector('.electric-ring-svg');
+    if(svgEl) svgEl.style.animationDuration = castMs + 'ms';
+    stage.appendChild(el);
+    setTimeout(function(){ el.remove(); }, castMs);
+  }
+
+  function performElectricReaction(ch, def, lvl){
+    var percent = def.basePercent + (lvl - 1) * def.percentPerLevel;
+
+    var stage = document.getElementById('harbor-stage');
+    var stageRect = stage ? stage.getBoundingClientRect() : null;
+    var playerEl = document.getElementById('player-avatar');
+    var pRect = playerEl ? playerEl.getBoundingClientRect() : null;
+    var px = pRect ? pRect.left + pRect.width / 2 : null;
+    var py = pRect ? pRect.top + pRect.height / 2 : null;
+
+    var targets = state.inRangeSlots
+      .filter(function(slotId){ return !!state.monsters[slotId]; })
+      .map(function(slotId){
+        var el = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+        var rect = el ? el.getBoundingClientRect() : null;
+        var dist = (rect && px !== null) ? Math.hypot((rect.left + rect.width / 2) - px, (rect.top + rect.height / 2) - py) : Infinity;
+        return { slotId:slotId, dist:dist };
+      })
+      .sort(function(a, b){ return a.dist - b.dist; })
+      .slice(0, def.baseTargets)
+      .map(function(t){ return t.slotId; });
+
+    if(targets.length === 0) return;
+
+    for(var hitIdx = 0; hitIdx < def.baseHits; hitIdx++){
+      (function(){
+        setTimeout(function(){
+          if(!state.character) return;
+          targets.forEach(function(slotId){
+            var mon = state.monsters[slotId];
+            if(!mon) return;
+            var monEl = document.querySelector('.mon-slot[data-slot="' + slotId + '"]');
+            var mRect = monEl ? monEl.getBoundingClientRect() : null;
+            var isCrit = Math.random() * 100 < ch.critChance;
+            var rolledAtk = rollDamageWithProficiency(ch.atk, ch.proficiency);
+            var baseDmg = Math.round(rolledAtk * (percent / 100));
+            var dmg = isCrit ? Math.round(baseDmg * (1 + ch.critDamage / 100)) : baseDmg;
+            mon.hp -= dmg;
+            if(mRect) spawnDamagePopup(stage, stageRect, mRect.left + mRect.width / 2, mRect.top + mRect.height / 2, String(dmg), isCrit ? 'crit' : 'normal');
+            if(mon.hp <= 0){
+              state.monsters[slotId] = null;
+              grantKillRewards(ch, mon);
+            }
+          });
+          saveCharacter(state.account.id, ch);
+          renderStats();
+          renderWorld();
+        }, hitIdx * 150);
+      })();
+    }
+  }
+
+  // ---------------- 단축키 바(하단 6칸) 렌더링/쿨타임 표시 ----------------
+  function renderHotbar(){
+    var ch = state.character;
+    var hotbarEl = document.getElementById('hotbar');
+    if(!ch || !ch.hotbar || !hotbarEl) return;
+    hotbarEl.innerHTML = ch.hotbar.map(function(skillId, idx){
+      var def = skillId ? findSkillDef(skillId) : null;
+      var keyLabel = HOTBAR_KEYS[idx].toUpperCase();
+      var iconHtml = def ? skillIconSvg(def.id) : '';
+      return '<div class="hotbar-slot' + (def ? ' has-skill' : '') + '" data-hotbar-index="' + idx + '">' +
+        '<div class="hotbar-key">' + keyLabel + '</div>' +
+        '<div class="hotbar-icon">' + iconHtml + '</div>' +
+      '</div>';
+    }).join('');
+    // 모바일에서는 키보드 대신 탭으로 스킬을 시전(PC에서는 기존 단축키도 그대로 동작)
+    document.querySelectorAll('#hotbar .hotbar-slot').forEach(function(el, idx){
+      el.onclick = function(){
+        var skillId = ch.hotbar[idx];
+        if(skillId) castActiveSkill(skillId);
+      };
+    });
+    updateHotbarCooldownDisplay();
+  }
+
+  function updateHotbarCooldownDisplay(){
+    var ch = state.character;
+    if(!ch || !ch.hotbar) return;
+    ch.hotbar.forEach(function(skillId, idx){
+      var el = document.querySelector('#hotbar .hotbar-slot[data-hotbar-index="' + idx + '"]');
+      if(!el) return;
+      var overlay = el.querySelector('.hotbar-cd-overlay');
+      if(!skillId){ if(overlay) overlay.remove(); return; }
+      var def = findSkillDef(skillId);
+      var cd = (def && def.cooldownMs) || 0;
+      var last = state.skillCooldowns[skillId] || 0;
+      var remain = cd - (Date.now() - last);
+      if(remain > 0){
+        var remainSec = Math.ceil(remain / 1000);
+        if(!overlay){
+          overlay = document.createElement('div');
+          overlay.className = 'hotbar-cd-overlay';
+          el.appendChild(overlay);
+        }
+        overlay.textContent = remainSec;
+      }else if(overlay){
+        overlay.remove();
+      }
+    });
+  }
+
+  function startHotbarCooldownLoop(){
+    setInterval(function(){
+      if(!document.getElementById('screen-game').classList.contains('active')) return;
+      updateHotbarCooldownDisplay();
+    }, 200);
+  }
+
+  // ---------------- 스킬 장착 위치 선택 ----------------
+  var hotbarAssignSkillId = null;
+
+  function openHotbarAssignPicker(skillId){
+    hotbarAssignSkillId = skillId;
+    var def = findSkillDef(skillId);
+    document.getElementById('hotbar-assign-skill-name').textContent =
+      (def ? def.name : '') + '을(를) 장착할 칸을 선택하세요.';
+    renderHotbarAssignGrid();
+    openModal('modal-hotbar-assign');
+  }
+
+  function renderHotbarAssignGrid(){
+    var ch = state.character;
+    document.getElementById('hotbar-assign-grid').innerHTML = ch.hotbar.map(function(occupantId, idx){
+      var def = occupantId ? findSkillDef(occupantId) : null;
+      var keyLabel = HOTBAR_KEYS[idx].toUpperCase();
+      return '<div class="hotbar-slot hotbar-assign-slot" data-hotbar-index="' + idx + '">' +
+        '<div class="hotbar-key">' + keyLabel + '</div>' +
+        '<div class="hotbar-icon">' + (def ? skillIconSvg(def.id) : '') + '</div>' +
+      '</div>';
+    }).join('');
+    document.querySelectorAll('.hotbar-assign-slot').forEach(function(el){
+      el.onclick = function(){
+        var idx = parseInt(el.dataset.hotbarIndex, 10);
+        assignSkillToHotbar(hotbarAssignSkillId, idx);
+        closeModal('modal-hotbar-assign');
+      };
+    });
+  }
+
+  // 같은 스킬이 이미 다른 칸에 있으면 그 칸은 비우고(한 스킬은 한 칸에만), 선택한 칸에 장착(기존 것 있으면 교체)
+  function assignSkillToHotbar(skillId, idx){
+    var ch = state.character;
+    if(!ch || !ch.hotbar) return;
+    for(var i = 0; i < ch.hotbar.length; i++){
+      if(ch.hotbar[i] === skillId) ch.hotbar[i] = null;
+    }
+    ch.hotbar[idx] = skillId;
+    saveCharacter(state.account.id, ch);
+    renderHotbar();
+    renderSkillModal();
+  }
+
+  function startRegenLoop(){
+    setInterval(function(){
+      var ch = state.character;
+      if(!ch) return;
+      if(ch.hp < ch.maxHp){
+        ch.hp = Math.min(ch.maxHp, ch.hp + ch.regen);
+        renderStats();
+      }
+    }, 1000);
+  }
+
+  function renderStats(){
+    var ch = state.character;
+    if(state.account){
+      document.getElementById('char-name-label').textContent = state.account.id + '의 솔 야누스 (Lv.' + ch.level + ')';
+    }
+    // 공격력/방어/재생/명중 등 상세 스탯은 상단 HUD가 아니라 "캐릭터 정보" 모달에서 확인(모바일 화면 공간 절약)
+    document.getElementById('hp-text').textContent = ch.hp + ' / ' + ch.maxHp;
+    document.getElementById('hp-bar').style.width = (ch.hp / ch.maxHp * 100) + '%';
+    document.getElementById('gold-amount').textContent = ch.gold;
+
+    var need = requiredExpForLevel(ch.level);
+    var pct = need !== null ? Math.min(100, ch.exp / need * 100) : 100;
+    document.getElementById('exp-bar-pct').textContent = pct.toFixed(2) + '%';
+    document.getElementById('exp-bar-fixed-fill').style.width = pct + '%';
+    document.getElementById('exp-bar-label').textContent = 'EXP ' + ch.exp + ' / ' + (need !== null ? need : 'MAX');
+  }
+
+  // ---------------- 스탯창 / 캐릭터 정보 모달 ----------------
+  function openModal(id){ document.getElementById(id).classList.add('active'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+  document.getElementById('btn-open-stat-window').onclick = function(){ renderStatModal(); openModal('modal-stat'); };
+  document.getElementById('modal-stat-close').onclick = function(){ closeModal('modal-stat'); };
+  document.getElementById('btn-open-char-info').onclick = function(){ renderCharInfoModal(); openModal('modal-charinfo'); };
+  document.getElementById('modal-charinfo-close').onclick = function(){ closeModal('modal-charinfo'); };
+  document.getElementById('btn-open-inventory').onclick = function(){ renderInventoryModal(); openModal('modal-inventory'); };
+  document.getElementById('modal-inventory-close').onclick = function(){ hideItemTooltip(); closeModal('modal-inventory'); };
+  document.getElementById('btn-open-skills').onclick = function(){ skillPanelIndex = 0; renderSkillModal(); openModal('modal-skills'); };
+  document.getElementById('modal-skills-close').onclick = function(){ hideItemTooltip(); closeModal('modal-skills'); };
+  document.getElementById('skill-arrow-left').onclick = function(){
+    if(skillPanelIndex > 0){ skillPanelIndex -= 1; hideItemTooltip(); renderSkillModal(); }
+  };
+  document.getElementById('skill-arrow-right').onclick = function(){
+    if(skillPanelIndex < SKILL_PANEL_ORDER.length - 1){ skillPanelIndex += 1; hideItemTooltip(); renderSkillModal(); }
+  };
+  document.getElementById('modal-hotbar-assign-close').onclick = function(){ closeModal('modal-hotbar-assign'); };
+
+  function statAllocRowHtml(label, key, value, desc, capReached){
+    return '<div class="stat-alloc-row">' +
+        '<span>' + label + ' : <b>' + value + '</b><span class="stat-desc">' + desc + '</span></span>' +
+        (capReached ? '<span style="font-size:.72rem;color:rgba(245,234,217,.4);">MAX</span>' :
+          '<button class="btn btn-primary btn-sm stat-plus-btn" data-stat="' + key + '">+</button>') +
+      '</div>';
+  }
+
+  function renderStatModal(){
+    var ch = state.character;
+    document.getElementById('stat-points-left').textContent = '보유 포인트: ' + ch.statPoints;
+    var html = '';
+    html += statAllocRowHtml('STR', 'str', ch.str, '공격력 · 체력 증가, 10당 체력재생 +2', false);
+    html += statAllocRowHtml('DEX', 'dex', ch.dex, '명중 +1, 방어 +0.5, 공격력 +0.1(소폭 증가)', false);
+    html += statAllocRowHtml('LUK', 'luk', ch.luk, '크리티컬 데미지 +0.1%(500 달성 시 +50%p 추가)', ch.luk >= STAT_RULES.lukCap);
+    document.getElementById('stat-alloc-list').innerHTML = html;
+
+    document.querySelectorAll('.stat-plus-btn').forEach(function(btn){
+      btn.disabled = ch.statPoints <= 0;
+      btn.onclick = function(){
+        var key = btn.dataset.stat;
+        if(ch.statPoints <= 0) return;
+        if(key === 'luk' && ch.luk >= STAT_RULES.lukCap) return;
+        ch[key] += 1;
+        ch.statPoints -= 1;
+        recalcDerivedStats(ch);
+        saveCharacter(state.account.id, ch);
+        renderStats();
+        renderStatModal();
+      };
+    });
+  }
+
+  function renderCharInfoModal(){
+    var ch = state.character;
+    var need = requiredExpForLevel(ch.level);
+    var rows = [
+      ['레벨', ch.level],
+      ['경험치', ch.exp + ' / ' + (need !== null ? need : 'MAX')],
+      ['골드', ch.gold],
+      ['STR', ch.str],
+      ['DEX', ch.dex],
+      ['LUK', ch.luk],
+      ['보유 스탯 포인트', ch.statPoints],
+      ['공격력', formatAtkRange(ch)],
+      ['숙련도', ch.proficiency + '%'],
+      ['에너지 효율(방어)', ch.def],
+      ['체력 재생', ch.regen],
+      ['명중률', ch.accuracy],
+      ['크리티컬 확률', ch.critChance + '%'],
+      ['크리티컬 데미지', ch.critDamage + '%']
+    ];
+    document.getElementById('charinfo-list').innerHTML = rows.map(function(r){
+      return '<div class="stat-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
+    }).join('');
+  }
+
+  // ---------------- 인벤토리 / 장비 ----------------
+  var EQUIP_SLOTS_LEFT = [
+    ['hat','모자'], ['top','상의'], ['bottom','하의'], ['gloves','장갑'], ['shoes','신발'], ['cape','망토'], ['weapon','동력장치']
+  ];
+  var EQUIP_SLOTS_RIGHT = [
+    ['ring1','반지'], ['ring2','반지'], ['ring3','반지'], ['ring4','반지'], ['necklace','목걸이'], ['earring','귀고리']
+  ];
+
+  function equipSlotHtml(key, label, item){
+    if(!item){
+      return '<div class="equip-slot" data-equip-key="' + key + '"><span class="slot-label-empty">' + label + '</span></div>';
+    }
+    return '<div class="equip-slot filled" data-equip-key="' + key + '">' +
+      '<div class="item-icon">' + itemIconSvg(item) + '</div>' +
+      '<div class="item-name">' + item.name + '</div>' +
+    '</div>';
+  }
+
+  function renderInventoryModal(){
+    var ch = state.character;
+
+    document.getElementById('equip-col-left').innerHTML = EQUIP_SLOTS_LEFT.map(function(s){
+      return equipSlotHtml(s[0], s[1], ch.equipment[s[0]]);
+    }).join('');
+    document.getElementById('equip-col-right').innerHTML = EQUIP_SLOTS_RIGHT.map(function(s){
+      return equipSlotHtml(s[0], s[1], ch.equipment[s[0]]);
+    }).join('');
+
+    document.getElementById('inv-grid').innerHTML = ch.inventory.map(function(item, idx){
+      if(!item){
+        return '<div class="inv-cell" data-inv-index="' + idx + '"></div>';
+      }
+      var cls = 'inv-cell filled' + (item.type === 'box' ? ' box-item' : '');
+      return '<div class="' + cls + '" data-inv-index="' + idx + '">' +
+        '<div class="item-icon">' + itemIconSvg(item) + '</div>' +
+        '<div class="item-name">' + item.name + '</div>' +
+      '</div>';
+    }).join('');
+
+    document.querySelectorAll('#modal-inventory .equip-slot').forEach(function(el){
+      el.ondblclick = function(){ unequipItem(el.dataset.equipKey); };
+      var item = ch.equipment[el.dataset.equipKey];
+      if(item){
+        el.addEventListener('mouseenter', function(){ showItemTooltip(item, el); });
+        el.addEventListener('mouseleave', hideItemTooltip);
+        addTouchTapAndDoubleTap(el,
+          function(){ showItemTooltip(item, el); },
+          function(){ unequipItem(el.dataset.equipKey); });
+      }
+    });
+    document.querySelectorAll('#modal-inventory .inv-cell').forEach(function(el){
+      el.ondblclick = function(){ handleInventoryDblClick(parseInt(el.dataset.invIndex, 10)); };
+      var item = ch.inventory[parseInt(el.dataset.invIndex, 10)];
+      if(item){
+        if(item.type !== 'box'){
+          el.addEventListener('mouseenter', function(){ showItemTooltip(item, el); });
+          el.addEventListener('mouseleave', hideItemTooltip);
+        }
+        addTouchTapAndDoubleTap(el,
+          function(){ if(item.type !== 'box') showItemTooltip(item, el); },
+          function(){ handleInventoryDblClick(parseInt(el.dataset.invIndex, 10)); });
+      }
+    });
+  }
+
+  // 아이템 하나의 스탯을 "STR +1  DEX +1 ..." 형태 문자열로 표시
+  function formatItemStats(stats){
+    if(!stats) return '';
+    var labels = { str:'STR', dex:'DEX', luk:'LUK', def:'방어력', atk:'공격력' };
+    var order = ['str', 'dex', 'luk', 'def', 'atk'];
+    var parts = [];
+    order.forEach(function(k){
+      if(typeof stats[k] === 'number') parts.push(labels[k] + ' +' + stats[k]);
+    });
+    return parts.join(' &nbsp;&nbsp; ');
+  }
+
+  // 세트 효과 정보(달성한 단계는 강조 표시)
+  function renderSetEffectHtml(ch, setId){
+    var def = SET_DEFS[setId];
+    if(!def) return '';
+    var count = countEquippedBySet(ch, setId);
+    var lines = def.tiers.map(function(t){
+      var active = count >= t.count;
+      var parts = [];
+      if(typeof t.str === 'number') parts.push('올스탯 +' + t.str);
+      if(typeof t.maxHp === 'number') parts.push('최대 HP +' + t.maxHp);
+      if(typeof t.atk === 'number') parts.push('공격력 +' + t.atk);
+      return '<div class="set-tier-line' + (active ? ' active' : '') + '">' +
+        t.count + '세트: ' + parts.join(', ') + (active ? ' (적용중)' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="item-tt-setname">' + def.label + ' (' + count + '/' + def.totalPieces + ')</div>' + lines;
+  }
+
+  // 아이템 툴팁 내용 조립: 이름 - 설명(플레이버 텍스트) - 착용 능력치 - 세트효과
+  function buildItemTooltipHtml(ch, item){
+    var desc = item.flavorText ||
+      ('모험의 시작을 위해 받은 ' + item.name + '이다.<br>성능은 그렇게 좋아보이지 않는 거 같은데...');
+    var html = '<div class="item-tt-name">' + item.name + '</div>' +
+      '<div class="item-tt-desc">' + desc + '</div>' +
+      '<div class="item-tt-stats">' + formatItemStats(item.stats) + '</div>';
+    if(item.setId) html += renderSetEffectHtml(ch, item.setId);
+    return html;
+  }
+
+  function showItemTooltip(item, el){
+    var tt = document.getElementById('item-tooltip');
+    tt.innerHTML = buildItemTooltipHtml(state.character, item);
+    tt.style.display = 'block';
+    var rect = el.getBoundingClientRect();
+    var ttRect = tt.getBoundingClientRect();
+    var top = rect.top - ttRect.height - 8;
+    if(top < 8) top = rect.bottom + 8;
+    var left = rect.left + rect.width / 2 - ttRect.width / 2;
+    left = Math.max(8, Math.min(window.innerWidth - ttRect.width - 8, left));
+    tt.style.top = top + 'px';
+    tt.style.left = left + 'px';
+  }
+
+  function hideItemTooltip(){
+    document.getElementById('item-tooltip').style.display = 'none';
+  }
+
+  // ---------------- 터치 환경 보조: 탭 = 마우스 hover(툴팁 미리보기), 빠른 두 번 탭 = dblclick(장착/해제/개봉) ----------------
+  // 데스크톱의 mouseenter/mouseleave/dblclick 로직은 그대로 두고, 터치에서만 별도로 탭/더블탭을 감지해 보완한다.
+  function addTouchTapAndDoubleTap(el, onSingleTap, onDoubleTap){
+    var TAP_MOVE_TOLERANCE_PX = 10;
+    var DOUBLE_TAP_WINDOW_MS = 350;
+    var lastTapAt = 0;
+    var singleTapTimer = null;
+    var startX = 0, startY = 0, startedHere = false;
+    el.addEventListener('touchstart', function(e){
+      // 카드/슬롯 안의 버튼(레벨업 +, 스킬 장착 등)은 자체 클릭으로 처리되므로 탭 로직에서 제외
+      if(e.touches.length !== 1 || (e.target.closest && e.target.closest('button'))){
+        startedHere = false;
+        return;
+      }
+      startedHere = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive:true });
+    el.addEventListener('touchend', function(e){
+      if(!startedHere) return;
+      startedHere = false;
+      var touch = e.changedTouches && e.changedTouches[0];
+      if(touch){
+        var moved = Math.hypot(touch.clientX - startX, touch.clientY - startY);
+        if(moved > TAP_MOVE_TOLERANCE_PX) return; // 스크롤/드래그 제스처는 탭으로 처리하지 않음
+      }
+      // 이 터치를 탭으로 확정 처리했으니, 브라우저가 뒤이어 합성 click/dblclick/mouseenter를
+      // 발생시켜 데스크톱용 핸들러(ondblclick 등)가 같은 동작을 중복 실행하지 않도록 막음
+      e.preventDefault();
+      var now = Date.now();
+      if(now - lastTapAt < DOUBLE_TAP_WINDOW_MS){
+        clearTimeout(singleTapTimer);
+        lastTapAt = 0;
+        if(onDoubleTap) onDoubleTap();
+      }else{
+        lastTapAt = now;
+        if(onSingleTap){
+          singleTapTimer = setTimeout(function(){ onSingleTap(); }, DOUBLE_TAP_WINDOW_MS);
+        }
+      }
+    });
+  }
+
+  // 툴팁을 띄운 요소 밖을 탭하면 닫음(터치에는 mouseleave가 없으므로 보완)
+  document.addEventListener('touchstart', function(e){
+    var tt = document.getElementById('item-tooltip');
+    if(tt.style.display === 'none') return;
+    var target = e.target.closest && e.target.closest('.equip-slot, .inv-cell, .skill-card, #item-tooltip');
+    if(!target) hideItemTooltip();
+  }, { passive:true });
+
+  // 조작 안내(i) 아이콘: 데스크톱은 hover로, 모바일은 탭으로 열고 닫음
+  (function setupInfoIconTap(){
+    var wrap = document.getElementById('info-icon-wrap');
+    if(!wrap) return;
+    wrap.addEventListener('click', function(e){
+      e.stopPropagation();
+      wrap.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e){
+      if(wrap.classList.contains('open') && !wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+  })();
+
+  function findEmptyInventoryIndex(ch){
+    for(var i = 0; i < ch.inventory.length; i++){
+      if(!ch.inventory[i]) return i;
+    }
+    return -1;
+  }
+
+  function handleInventoryDblClick(idx){
+    var ch = state.character;
+    var item = ch.inventory[idx];
+    if(!item) return;
+    if(item.type === 'box'){
+      openStarterBox(idx);
+    }else{
+      equipItemFromInventory(idx);
+    }
+  }
+
+  // 반지처럼 슬롯이 여러 개인 경우 빈 슬롯을 먼저 찾고, 다 차있으면 첫 번째 슬롯을 교체 대상으로 사용
+  function resolveEquipSlotKey(ch, slotType){
+    if(slotType === 'ring'){
+      var ringKeys = ['ring1', 'ring2', 'ring3', 'ring4'];
+      for(var i = 0; i < ringKeys.length; i++){
+        if(!ch.equipment[ringKeys[i]]) return ringKeys[i];
+      }
+      return ringKeys[0];
+    }
+    return slotType; // hat/top/bottom/gloves/shoes/cape/weapon/necklace/earring은 슬롯 키와 1:1
+  }
+
+  function openStarterBox(idx){
+    var ch = state.character;
+    var box = ch.inventory[idx];
+    if(!box || box.kind !== 'starter_box') return;
+    ch.inventory[idx] = null;
+    makeStarterItems().forEach(function(item){
+      var empty = findEmptyInventoryIndex(ch);
+      if(empty !== -1) ch.inventory[empty] = item;
+      // 인벤토리 자리가 부족하면 해당 아이템은 지급되지 않음(추후 우편함 등으로 보완 예정)
+    });
+    saveCharacter(state.account.id, ch);
+    renderInventoryModal();
+  }
+
+  function equipItemFromInventory(idx){
+    var ch = state.character;
+    var item = ch.inventory[idx];
+    if(!item) return;
+    var targetKey = resolveEquipSlotKey(ch, item.slotType);
+    if(!targetKey) return;
+
+    var current = ch.equipment[targetKey];
+    ch.equipment[targetKey] = item;
+    ch.inventory[idx] = current || null; // 기존에 장착 중이던 아이템은 방금 비운 자리로, 없으면 그냥 비움
+
+    recalcDerivedStats(ch);
+    saveCharacter(state.account.id, ch);
+    renderStats();
+    renderInventoryModal();
+  }
+
+  function unequipItem(key){
+    var ch = state.character;
+    var item = ch.equipment[key];
+    if(!item) return;
+    var empty = findEmptyInventoryIndex(ch);
+    if(empty === -1) return; // 인벤토리 자리가 없으면 해제 불가
+
+    ch.equipment[key] = null;
+    ch.inventory[empty] = item;
+
+    recalcDerivedStats(ch);
+    saveCharacter(state.account.id, ch);
+    renderStats();
+    renderInventoryModal();
+  }
+
+  // ---------------- 스킬 UI: 액티브 <-> 패시브를 화살표로 전환하는 한 화면 ----------------
+  var SKILL_PANEL_ORDER = ['active', 'passive']; // 0: 액티브(첫 화면), 1: 패시브
+  var skillPanelIndex = 0;
+
+  function skillCardHtml(ch, def){
+    var lvl = (ch.skills && ch.skills[def.id]) || 0;
+    var unlocked = ch.level >= def.reqLevel;
+    var points = def.type === 'active' ? ch.activeSkillPoints : ch.passiveSkillPoints;
+    var canInvest = unlocked && points > 0 && lvl < def.maxLevel;
+
+    var lockHtml = unlocked ? '' : '<div class="skill-lock-overlay">' + lockOverlaySvg() + '</div>';
+    var bottomHtml;
+    if(!unlocked){
+      bottomHtml = '<div class="skill-req">Lv.' + def.reqLevel + ' 필요</div>';
+    }else{
+      bottomHtml = '<div class="skill-level">Lv. ' + lvl + ' / ' + def.maxLevel + '</div>';
+      if(canInvest){
+        bottomHtml += '<button class="btn btn-primary btn-sm skill-plus-btn" data-skill-id="' + def.id + '">+</button>';
+      }else if(lvl >= def.maxLevel){
+        bottomHtml += '<span class="skill-req">MAX</span>';
+      }else{
+        bottomHtml += '<span class="skill-req">포인트 부족</span>';
+      }
+      if(def.type === 'active' && lvl > 0){
+        bottomHtml += '<button class="btn btn-secondary btn-sm skill-equip-btn" data-skill-id="' + def.id + '" style="margin-top:2px;">스킬 장착</button>';
+      }
+    }
+
+    var assignedKey = null;
+    if(def.type === 'active' && ch.hotbar){
+      var hbIdx = ch.hotbar.indexOf(def.id);
+      if(hbIdx !== -1) assignedKey = HOTBAR_KEYS[hbIdx].toUpperCase();
+    }
+    var keyBadgeHtml = assignedKey ? '<div class="skill-key-badge">' + assignedKey + '키</div>' : '';
+
+    return '<div class="skill-card" data-skill-id="' + def.id + '">' +
+      '<div class="skill-icon-wrap">' + skillIconSvg(def.id) + lockHtml + '</div>' +
+      '<div class="skill-name">' + def.name + '</div>' +
+      bottomHtml +
+      keyBadgeHtml +
+    '</div>';
+  }
+
+  // 스킬 설명 툴팁: 이름 - 설명 - (액티브는 레벨1 기준 고정 수치만, 레벨 스케일링 문구는 노출하지 않음)
+  function buildSkillTooltipHtml(ch, def){
+    var lvl = (ch.skills && ch.skills[def.id]) || 0;
+    var html = '<div class="item-tt-name">' + def.name + '</div>' +
+      '<div class="item-tt-desc">' + def.flavorText + '</div>';
+
+    if(def.type === 'active'){
+      html += '<div class="item-tt-stats">최대 주변 적 ' + def.baseTargets + '명에게 공격력의 ' +
+        def.basePercent + '% 데미지로 ' + def.baseHits + '회 공격</div>';
+      var castSec = def.castTimeMs ? (def.castTimeMs / 1000) : 0;
+      var postSec = def.postDelayMs ? (def.postDelayMs / 1000) : 0;
+      if(def.cooldownMs || castSec || postSec){
+        html += '<div class="item-tt-stats" style="font-weight:400;">' +
+          (castSec ? '시전시간 ' + castSec + '초 · ' : '') +
+          (postSec ? '후딜레이 ' + postSec + '초 · ' : '') +
+          (def.cooldownMs ? '쿨타임 ' + (def.cooldownMs / 1000) + '초' : '') +
+        '</div>';
+      }
+    }else{
+      html += '<div class="item-tt-stats">레벨당 공격력 +' + def.atkPerLevel + ', 공격 범위 +' + def.rangePerLevelPx + 'px' +
+        '<br>' + (def.targetsPerFiveLevels * 5) + '레벨당 공격 마릿수 +' + def.targetsPerFiveLevels + '</div>';
+    }
+
+    html += '<div class="item-tt-setname">필요 레벨 ' + def.reqLevel + ' · 마스터(최대) 스킬 레벨 ' + def.maxLevel + '</div>';
+
+    if(lvl > 0){
+      if(def.type === 'passive'){
+        var pb = { atk: lvl * def.atkPerLevel, range: lvl * def.rangePerLevelPx, targets: Math.floor((lvl - 1) / 5) * def.targetsPerFiveLevels + def.targetsPerFiveLevels };
+        html += '<div class="set-tier-line active">현재 Lv.' + lvl + ' 적용: 공격력 +' + pb.atk + ', 범위 +' + pb.range + 'px, 마릿수 +' + pb.targets + '</div>';
+      }else{
+        var curPercent = def.basePercent + (lvl - 1) * def.percentPerLevel;
+        html += '<div class="set-tier-line active">현재 Lv.' + lvl + ' 적용: 공격력의 ' + curPercent + '% 데미지 x ' + def.baseHits + '회</div>';
+      }
+    }
+    return html;
+  }
+
+  function renderSkillModal(){
+    var ch = state.character;
+    var panel = SKILL_PANEL_ORDER[skillPanelIndex];
+    var isActive = panel === 'active';
+
+    document.getElementById('skill-panel-title').textContent = isActive ? '액티브 스킬' : '패시브 스킬';
+    document.getElementById('skill-points-left').textContent =
+      '보유 포인트: ' + (isActive ? ch.activeSkillPoints : ch.passiveSkillPoints);
+    document.getElementById('skill-arrow-left').disabled = skillPanelIndex === 0;
+    document.getElementById('skill-arrow-right').disabled = skillPanelIndex === SKILL_PANEL_ORDER.length - 1;
+
+    var list = SKILL_DEFS[panel];
+    document.getElementById('skill-grid').innerHTML = list.map(function(def){
+      return skillCardHtml(ch, def);
+    }).join('');
+
+    document.querySelectorAll('#modal-skills .skill-card').forEach(function(el){
+      var def = findSkillDef(el.dataset.skillId);
+      if(!def) return;
+      function showThisSkillTooltip(){
+        var tt = document.getElementById('item-tooltip');
+        tt.innerHTML = buildSkillTooltipHtml(ch, def);
+        tt.style.display = 'block';
+        var rect = el.getBoundingClientRect();
+        var ttRect = tt.getBoundingClientRect();
+        var top = rect.top - ttRect.height - 8;
+        if(top < 8) top = rect.bottom + 8;
+        var left = rect.left + rect.width / 2 - ttRect.width / 2;
+        left = Math.max(8, Math.min(window.innerWidth - ttRect.width - 8, left));
+        tt.style.top = top + 'px';
+        tt.style.left = left + 'px';
+      }
+      el.addEventListener('mouseenter', showThisSkillTooltip);
+      el.addEventListener('mouseleave', hideItemTooltip);
+      // 터치에서는 카드를 탭하면 툴팁을 미리보기로 보여줌(레벨업/장착은 카드 안의 버튼을 눌러야 함)
+      addTouchTapAndDoubleTap(el, showThisSkillTooltip, showThisSkillTooltip);
+    });
+
+    document.querySelectorAll('.skill-plus-btn').forEach(function(btn){
+      btn.onclick = function(){
+        var def = findSkillDef(btn.dataset.skillId);
+        if(!def) return;
+        var pointsKey = def.type === 'active' ? 'activeSkillPoints' : 'passiveSkillPoints';
+        var lvl = ch.skills[def.id] || 0;
+        if(ch.level < def.reqLevel || ch[pointsKey] <= 0 || lvl >= def.maxLevel) return;
+        ch.skills[def.id] = lvl + 1;
+        ch[pointsKey] -= 1;
+        recalcDerivedStats(ch);
+        saveCharacter(state.account.id, ch);
+        renderStats();
+        renderSkillModal();
+      };
+    });
+
+    document.querySelectorAll('.skill-equip-btn').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        hideItemTooltip();
+        openHotbarAssignPicker(btn.dataset.skillId);
+      };
+    });
+  }
+
+  // ---------------- 반응형: 창 크기가 바뀌면 스테이지 안 좌표를 비율에 맞춰 재조정 ----------------
+  var lastStageSize = { w:0, h:0 };
+  var resizeDebounceTimer = null;
+
+  function captureStageSize(){
+    var stage = document.getElementById('harbor-stage');
+    if(!stage) return;
+    lastStageSize.w = stage.clientWidth;
+    lastStageSize.h = stage.clientHeight;
+  }
+
+  function handleStageResize(){
+    var stage = document.getElementById('harbor-stage');
+    if(!stage || !document.getElementById('screen-game').classList.contains('active')) return;
+    var newW = stage.clientWidth;
+    var newH = stage.clientHeight;
+    if(lastStageSize.w === 0 || lastStageSize.h === 0){
+      lastStageSize.w = newW; lastStageSize.h = newH;
+      return;
+    }
+    var scaleX = newW / lastStageSize.w;
+    var scaleY = newH / lastStageSize.h;
+    if(scaleX === 1 && scaleY === 1) return;
+
+    var player = document.getElementById('player-avatar');
+    if(player){
+      var pLeft = parseFloat(player.style.left) || 0;
+      var pTop = parseFloat(player.style.top) || 0;
+      player.style.left = (pLeft * scaleX) + 'px';
+      player.style.top = (pTop * scaleY) + 'px';
+    }
+    document.querySelectorAll('.mon-slot').forEach(function(el){
+      var left = parseFloat(el.style.left) || 0;
+      var top = parseFloat(el.style.top) || 0;
+      var homeLeft = parseFloat(el.dataset.homeLeft) || 0;
+      var homeTop = parseFloat(el.dataset.homeTop) || 0;
+      var scaledPos = nudgeOutOfMobileControlKeepout(left * scaleX, top * scaleY, newW, newH);
+      var scaledHome = nudgeOutOfMobileControlKeepout(homeLeft * scaleX, homeTop * scaleY, newW, newH);
+      el.style.left = scaledPos.x + 'px';
+      el.style.top = scaledPos.y + 'px';
+      el.dataset.homeLeft = scaledHome.x;
+      el.dataset.homeTop = scaledHome.y;
+    });
+
+    lastStageSize.w = newW;
+    lastStageSize.h = newH;
+    computeInRangeSlots();
+  }
+
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = setTimeout(handleStageResize, 120);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "appId": "com.solyanus.app",
+  "appName": "솔 야누스 키우기",
+  "webDir": "www",
+  "backgroundColor": "#1c1530",
+  "android": {
+    "backgroundColor": "#1c1530"
+  },
+  "ios": {
+    "backgroundColor": "#1c1530",
+    "contentInset": "always"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#1c1530",
+      "showSpinner": false
+    }
+  }
+}
